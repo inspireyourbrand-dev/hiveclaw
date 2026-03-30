@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team - HiveControl OS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #0a0a0a;
+            color: #e0e0e0;
+            font-family: 'Poppins', sans-serif;
+            line-height: 1.6;
+            padding: 24px;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Rajdhani', monospace;
+            font-weight: 700;
+        }
+
+        /* Mission Statement Banner */
+        .mission-banner {
+            background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
+            border: 2px solid transparent;
+            background-image: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%),
+                              linear-gradient(135deg, #3ebaf4, #df30ff, #ffe930);
+            background-origin: border-box;
+            background-clip: padding-box, border-box;
+            padding: 40px;
+            margin-bottom: 48px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .mission-banner h1 {
+            font-size: 2.5rem;
+            margin-bottom: 12px;
+            background: linear-gradient(90deg, #3ebaf4, #df30ff, #ffe930);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .mission-banner p {
+            font-size: 1.1rem;
+            color: #b0b0b0;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Section Header */
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 32px;
+            margin-top: 40px;
+        }
+
+        .section-header h2 {
+            font-size: 1.8rem;
+            color: #3ebaf4;
+        }
+
+        .section-divider {
+            flex: 1;
+            height: 2px;
+            background: linear-gradient(90deg, #3ebaf4, transparent);
+        }
+
+        /* Org Chart */
+        .org-chart {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 60px;
+            margin-bottom: 48px;
+            padding: 40px;
+            background-color: #1a1a1a;
+            border-radius: 8px;
+            position: relative;
+        }
+
+        .org-chart-row {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            position: relative;
+            width: 100%;
+            flex-wrap: wrap;
+        }
+
+        /* Connector lines */
+        .org-connector {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            width: 2px;
+            height: 30px;
+            background: linear-gradient(180deg, #3ebaf4, transparent);
+        }
+
+        .org-connector-horizontal {
+            position: absolute;
+            top: -30px;
+            height: 2px;
+            background: #3ebaf4;
+        }
+
+        .org-card {
+            position: relative;
+            text-align: center;
+            padding: 20px;
+            background-color: #0a0a0a;
+            border: 2px solid;
+            border-radius: 8px;
+            min-width: 140px;
+            transition: all 0.3s ease;
+        }
+
+        .org-card.orion {
+            border-color: #3ebaf4;
+            box-shadow: 0 0 20px rgba(62, 186, 244, 0.3);
+        }
+
+        .org-card.specialist {
+            border-color: #df30ff;
+        }
+
+        .org-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 0 30px rgba(62, 186, 244, 0.5);
+        }
+
+        .org-card-emoji {
+            font-size: 2.5rem;
+            margin-bottom: 8px;
+        }
+
+        .org-card-name {
+            font-family: 'Rajdhani', monospace;
+            font-size: 1rem;
+            font-weight: 700;
+            color: #3ebaf4;
+        }
+
+        .org-card-role {
+            font-size: 0.85rem;
+            color: #b0b0b0;
+            margin-top: 4px;
+        }
+
+        /* Agent Cards Grid */
+        .agents-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 24px;
+            margin-bottom: 48px;
+        }
+
+        .agent-card {
+            background-color: #1a1a1a;
+            border: 2px solid #2a2a2a;
+            border-radius: 8px;
+            padding: 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .agent-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--agent-color, #3ebaf4), transparent);
+            opacity: 0.6;
+        }
+
+        .agent-card.orion { --agent-color: #3ebaf4; }
+        .agent-card.atlas { --agent-color: #00d49b; }
+        .agent-card.forge { --agent-color: #ffe930; }
+        .agent-card.patch { --agent-color: #df30ff; }
+        .agent-card.quill { --agent-color: #3ebaf4; }
+        .agent-card.cipher { --agent-color: #ff6b6b; }
+        .agent-card.pixel { --agent-color: #df30ff; }
+        .agent-card.spark { --agent-color: #ffe930; }
+
+        .agent-card:hover {
+            border-color: var(--agent-color, #3ebaf4);
+            box-shadow: 0 0 30px rgba(62, 186, 244, 0.2);
+            transform: translateY(-4px);
+        }
+
+        .agent-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .agent-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+        }
+
+        .agent-emoji {
+            font-size: 2rem;
+            flex-shrink: 0;
+        }
+
+        .agent-title {
+            flex: 1;
+        }
+
+        .agent-name {
+            font-family: 'Rajdhani', monospace;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--agent-color, #3ebaf4);
+            margin-bottom: 4px;
+        }
+
+        .agent-role {
+            font-size: 0.9rem;
+            color: #b0b0b0;
+        }
+
+        .agent-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.8rem;
+            color: #b0b0b0;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--agent-color, #3ebaf4);
+            animation: pulse 2s infinite;
+        }
+
+        .status-dot.idle {
+            background-color: #ffb800;
+            animation: pulse-idle 2s infinite;
+        }
+
+        .status-dot.offline {
+            background-color: #666;
+            animation: none;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        @keyframes pulse-idle {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 0.3; }
+        }
+
+        .agent-department {
+            display: inline-block;
+            background-color: rgba(62, 186, 244, 0.2);
+            color: #3ebaf4;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .agent-section {
+            margin-bottom: 16px;
+        }
+
+        .agent-section-title {
+            font-family: 'Rajdhani', monospace;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #3ebaf4;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .agent-responsibilities, .agent-triggers, .agent-cadence {
+            font-size: 0.9rem;
+            color: #c0c0c0;
+        }
+
+        .agent-responsibilities li {
+            margin-left: 20px;
+            margin-bottom: 6px;
+            list-style-type: disc;
+        }
+
+        .agent-triggers, .agent-cadence {
+            margin-bottom: 12px;
+        }
+
+        .agent-current-task {
+            background-color: rgba(62, 186, 244, 0.1);
+            padding: 12px;
+            border-left: 3px solid var(--agent-color, #3ebaf4);
+            border-radius: 4px;
+            font-size: 0.9rem;
+            color: #b0b0b0;
+            margin-top: 12px;
+        }
+
+        .agent-current-task-empty {
+            color: #666;
+            font-style: italic;
+        }
+
+        /* Expanded Agent Details */
+        .agent-card.expanded {
+            grid-column: 1 / -1;
+        }
+
+        .agent-card.expanded .agent-details-full {
+            display: block;
+        }
+
+        .agent-details-full {
+            display: none;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #2a2a2a;
+        }
+
+        .agent-details-full h4 {
+            color: var(--agent-color, #3ebaf4);
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+
+        .agent-details-full p {
+            font-size: 0.9rem;
+            color: #b0b0b0;
+            margin-bottom: 12px;
+            line-height: 1.6;
+        }
+
+        /* Dynamic Agents Section */
+        .dynamic-agents-container {
+            background-color: #1a1a1a;
+            border: 2px dashed #2a2a2a;
+            border-radius: 8px;
+            padding: 32px;
+            text-align: center;
+            margin-bottom: 48px;
+        }
+
+        .dynamic-agents-empty {
+            color: #888;
+        }
+
+        .dynamic-agents-empty p {
+            margin-bottom: 8px;
+        }
+
+        .dynamic-agents-explanation {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 12px;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.5;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-family: 'Rajdhani', monospace;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3ebaf4, #df30ff);
+            color: #0a0a0a;
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 0 20px rgba(62, 186, 244, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            border: 2px solid #3ebaf4;
+            color: #3ebaf4;
+        }
+
+        .btn-secondary:hover {
+            background-color: rgba(62, 186, 244, 0.1);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: #1a1a1a;
+            border: 2px solid #3ebaf4;
+            border-radius: 8px;
+            padding: 40px;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 0 50px rgba(62, 186, 244, 0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #2a2a2a;
+        }
+
+        .modal-header h2 {
+            color: #3ebaf4;
+            margin: 0;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: #3ebaf4;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-close:hover {
+            color: #df30ff;
+        }
+
+        .modal-body {
+            color: #c0c0c0;
+        }
+
+        .modal-body h3 {
+            color: #df30ff;
+            margin-top: 24px;
+            margin-bottom: 12px;
+            font-size: 1.1rem;
+        }
+
+        .modal-body p {
+            margin-bottom: 12px;
+            line-height: 1.6;
+        }
+
+        .modal-body ol, .modal-body ul {
+            margin-left: 20px;
+            margin-bottom: 12px;
+        }
+
+        .modal-body li {
+            margin-bottom: 8px;
+        }
+
+        .command-block {
+            background-color: #0a0a0a;
+            border-left: 3px solid #3ebaf4;
+            padding: 12px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            margin: 12px 0;
+            color: #3ebaf4;
+            overflow-x: auto;
+        }
+
+        /* Drift Check */
+        .drift-check {
+            background-color: #1a1a1a;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 48px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .drift-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .drift-indicator.in-sync {
+            background-color: #00d49b;
+            box-shadow: 0 0 15px rgba(0, 212, 155, 0.5);
+        }
+
+        .drift-indicator.drift-detected {
+            background-color: #ffe930;
+            box-shadow: 0 0 15px rgba(255, 233, 48, 0.5);
+            animation: pulse 2s infinite;
+        }
+
+        .drift-info {
+            flex: 1;
+        }
+
+        .drift-status {
+            font-family: 'Rajdhani', monospace;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #3ebaf4;
+            margin-bottom: 4px;
+        }
+
+        .drift-details {
+            font-size: 0.85rem;
+            color: #b0b0b0;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .mission-banner h1 {
+                font-size: 1.8rem;
+            }
+
+            .agents-grid {
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            }
+
+            .org-chart {
+                gap: 40px;
+            }
+
+            .org-chart-row {
+                gap: 20px;
+            }
+
+            .modal-content {
+                padding: 24px;
+                margin: 20px;
+                max-width: none;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 16px;
+            }
+
+            .mission-banner {
+                padding: 24px;
+            }
+
+            .mission-banner h1 {
+                font-size: 1.4rem;
+            }
+
+            .agents-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .agent-card {
+                padding: 16px;
+            }
+
+            .section-header h2 {
+                font-size: 1.4rem;
+            }
+
+            .org-chart {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Mission Statement Banner -->
+    <div class="mission-banner">
+        <h1>HiveControl Team</h1>
+        <p>Empowering businesses with AI agent swarms that work while you sleep.</p>
+    </div>
+
+    <!-- Org Chart -->
+    <div class="section-header">
+        <h2>Agent Org Chart</h2>
+        <div class="section-divider"></div>
+    </div>
+
+    <div class="org-chart">
+        <!-- Orion - Top -->
+        <div class="org-chart-row">
+            <div class="org-card orion">
+                <div class="org-card-emoji">🌌</div>
+                <div class="org-card-name">Orion</div>
+                <div class="org-card-role">Master Orchestrator</div>
+            </div>
+        </div>
+
+        <!-- Specialist Agents -->
+        <div class="org-chart-row" style="position: relative;">
+            <div class="org-connector-horizontal" style="left: 0; right: 0; width: 100%; top: -30px;"></div>
+
+            <div class="org-card specialist">
+                <div class="org-card-emoji">🗺️</div>
+                <div class="org-card-name">Atlas</div>
+                <div class="org-card-role">Infrastructure</div>
+            </div>
+
+            <div class="org-card specialist">
+                <div class="org-card-emoji">🔨</div>
+                <div class="org-card-name">Forge</div>
+                <div class="org-card-role">Code & Build</div>
+            </div>
+
+            <div class="org-card specialist">
+                <div class="org-card-emoji">🔧</div>
+                <div class="org-card-name">Patch</div>
+                <div class="org-card-role">Bug Fixing</div>
+            </div>
+
+            <div class="org-card specialist">
+                <div class="org-card-emoji">📝</div>
+                <div class="org-card-name">Quill</div>
+                <div class="org-card-role">Content & Docs</div>
+            </div>
+
+            <div class="org-card specialist">
+                <div class="org-card-emoji">🔐</div>
+                <div class="org-card-name">Cipher</div>
+                <div class="org-card-role">Security</div>
+            </div>
+
+            <div class="org-card specialist">
+                <div class="org-card-emoji">🎨</div>
+                <div class="org-card-name">Pixel</div>
+                <div class="org-card-role">Design & UI</div>
+            </div>
+
+            <div class="org-card specialist">
+                <div class="org-card-emoji">⚡</div>
+                <div class="org-card-name">Spark</div>
+                <div class="org-card-role">Research & Analysis</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Permanent Team -->
+    <div class="section-header">
+        <h2>Permanent Team</h2>
+        <div class="section-divider"></div>
+    </div>
+
+    <div class="agents-grid" id="agentsGrid">
+        <!-- Agent cards will be generated here -->
+    </div>
+
+    <!-- Dynamic Agents Section -->
+    <div class="section-header">
+        <h2>Dynamic Agents</h2>
+        <div class="section-divider"></div>
+    </div>
+
+    <div class="dynamic-agents-container">
+        <div class="dynamic-agents-empty">
+            <h3 style="font-family: 'Rajdhani', monospace; color: #3ebaf4; margin-bottom: 12px;">No Dynamic Agents Spawned</h3>
+            <p>Dynamic agents are created on-demand by HiveWorkflow when specialized tasks exceed the permanent team's capacity.</p>
+            <div class="dynamic-agents-explanation">
+                When you deploy complex workflows or enable HiveWorkflow mode, the system will automatically spawn specialized agents to handle parallel work streams. These temporary agents will appear here with their specific roles and task assignments.
+            </div>
+        </div>
+    </div>
+
+    <!-- Drift Check -->
+    <div class="section-header">
+        <h2>System Status</h2>
+        <div class="section-divider"></div>
+    </div>
+
+    <div class="drift-check">
+        <div class="drift-indicator in-sync" id="driftIndicator"></div>
+        <div class="drift-info">
+            <div class="drift-status" id="driftStatus">In Sync</div>
+            <div class="drift-details" id="driftDetails">AGENTS.md definition matches runtime state</div>
+        </div>
+    </div>
+
+    <!-- Spawn Team Playbook Button -->
+    <div style="text-align: center; margin-top: 48px;">
+        <button class="btn btn-primary" onclick="openPlaybookModal()">Spawn Full Team Playbook</button>
+    </div>
+
+    <!-- Modal for Playbook -->
+    <div id="playbookModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Spawn Full Team Playbook</h2>
+                <button class="modal-close" onclick="closePlaybookModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Activate the complete HiveControl agent swarm with this command flow:</p>
+
+                <h3>Prerequisites</h3>
+                <ul>
+                    <li>HiveControl OS environment initialized</li>
+                    <li>All 8 permanent agents configured and connected</li>
+                    <li>WebSocket server running for agent communication</li>
+                </ul>
+
+                <h3>Activation Command</h3>
+                <div class="command-block">hivecontrol spawn-team --full --cascade
+                </div>
+
+                <h3>Command Flow</h3>
+                <ol>
+                    <li><strong>Initialize Orion</strong> - Master orchestrator boots and establishes coordination hub</li>
+                    <li><strong>Bootstrap Specialists</strong> - All 7 specialist agents initialize in parallel:
+                        <ul style="margin-top: 8px;">
+                            <li>Atlas (Infrastructure & Ops)</li>
+                            <li>Forge (Code & Build)</li>
+                            <li>Patch (Bug Fixing)</li>
+                            <li>Quill (Content & Docs)</li>
+                            <li>Cipher (Security & Compliance)</li>
+                            <li>Pixel (Design & UI/UX)</li>
+                            <li>Spark (Research & Analysis)</li>
+                        </ul>
+                    </li>
+                    <li><strong>Verify Connectivity</strong> - All agents confirm WebSocket connection and readiness</li>
+                    <li><strong>Load Capability Maps</strong> - Each agent loads its capability definitions and trigger conditions</li>
+                    <li><strong>Establish Work Queue</strong> - Orion sets up distributed task queue for incoming work</li>
+                    <li><strong>Enter Ready State</strong> - Swarm enters standby, waiting for work triggers</li>
+                </ol>
+
+                <h3>Status Verification</h3>
+                <p>Monitor activation progress:</p>
+                <div class="command-block">hivecontrol team status --watch</div>
+
+                <h3>Expected Output</h3>
+                <p>Once complete, all 8 agents should show <span style="color: #00d49b;">ACTIVE</span> status with zero drift. The swarm is then ready to process work continuously.</p>
+
+                <p style="margin-top: 24px; color: #888; font-size: 0.85rem;">
+                    <strong>Note:</strong> The team playbook is automatic. Additional dynamic agents will spawn on-demand based on workflow complexity.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Agent Data Structure
+        const agents = [
+            {
+                id: 'orion',
+                name: 'Orion',
+                emoji: '🌌',
+                role: 'Master Orchestrator',
+                department: 'Leadership',
+                color: '#3ebaf4',
+                responsibilities: [
+                    'Routes all incoming work to appropriate specialists',
+                    'Manages priorities and load balancing across swarm',
+                    'Coordinates inter-agent communication',
+                    'Ensures system-level coherence and goals alignment'
+                ],
+                triggers: [
+                    'New work item arrives in queue',
+                    'System load or priority changes',
+                    'Agent status changes or failures detected',
+                    'Continuous (passive monitoring)'
+                ],
+                cadence: 'Real-time decision-making, sub-second response',
+                status: 'active',
+                currentTask: 'Monitoring swarm health and distributing tasks'
+            },
+            {
+                id: 'atlas',
+                name: 'Atlas',
+                emoji: '🗺️',
+                role: 'Infrastructure & Ops',
+                department: 'Operations',
+                color: '#00d49b',
+                responsibilities: [
+                    'Deployment and server management',
+                    'Network configuration and monitoring',
+                    'Cloud resource optimization',
+                    'System scaling and performance tuning'
+                ],
+                triggers: [
+                    'Deployment requests in pipeline',
+                    'Server health alerts',
+                    'Resource utilization thresholds exceeded',
+                    'Scheduled maintenance windows'
+                ],
+                cadence: 'Event-driven + daily optimization pass',
+                status: 'active',
+                currentTask: 'Monitoring cloud resource usage'
+            },
+            {
+                id: 'forge',
+                name: 'Forge',
+                emoji: '🔨',
+                role: 'Code & Build',
+                department: 'Development',
+                color: '#ffe930',
+                responsibilities: [
+                    'Code generation and feature development',
+                    'Build pipeline management',
+                    'Dependency management and updates',
+                    'Architecture planning and implementation'
+                ],
+                triggers: [
+                    'Feature requests or development tickets',
+                    'Build failures in CI/CD',
+                    'New code submitted for processing',
+                    'Architecture review requests'
+                ],
+                cadence: 'Event-driven, typically 30-min response',
+                status: 'active',
+                currentTask: 'Building new feature branch'
+            },
+            {
+                id: 'patch',
+                name: 'Patch',
+                emoji: '🔧',
+                role: 'Bug Fixing',
+                department: 'QA & Maintenance',
+                color: '#df30ff',
+                responsibilities: [
+                    'Debugging and error investigation',
+                    'Test repair and test-suite optimization',
+                    'Root cause analysis',
+                    'Regression prevention'
+                ],
+                triggers: [
+                    'Bug reports or issues logged',
+                    'Test failures detected',
+                    'Error rate spikes in production',
+                    'Code review findings'
+                ],
+                cadence: 'Event-driven, priority-based response',
+                status: 'idle',
+                currentTask: null
+            },
+            {
+                id: 'quill',
+                name: 'Quill',
+                emoji: '📝',
+                role: 'Content & Docs',
+                department: 'Content',
+                color: '#3ebaf4',
+                responsibilities: [
+                    'Technical documentation creation',
+                    'Copywriting and content optimization',
+                    'Newsletter and update generation',
+                    'User guide and tutorial authoring'
+                ],
+                triggers: [
+                    'Documentation requests',
+                    'Release notes needed',
+                    'Content marketing campaigns',
+                    'User onboarding material requests'
+                ],
+                cadence: 'Weekly reviews + event-driven',
+                status: 'active',
+                currentTask: 'Writing release notes for v2.4'
+            },
+            {
+                id: 'cipher',
+                name: 'Cipher',
+                emoji: '🔐',
+                role: 'Security & Compliance',
+                department: 'Security',
+                color: '#ff6b6b',
+                responsibilities: [
+                    'Security audits and penetration testing',
+                    'Access control review',
+                    'Compliance verification and reporting',
+                    'Vulnerability assessment and remediation'
+                ],
+                triggers: [
+                    'Security audit requests',
+                    'Compliance checks scheduled',
+                    'Vulnerability disclosures',
+                    'Access change requests'
+                ],
+                cadence: 'Continuous monitoring + monthly deep audits',
+                status: 'active',
+                currentTask: 'Running weekly security scan'
+            },
+            {
+                id: 'pixel',
+                name: 'Pixel',
+                emoji: '🎨',
+                role: 'Design & UI/UX',
+                department: 'Design',
+                color: '#df30ff',
+                responsibilities: [
+                    'Frontend design and component creation',
+                    'Branding consistency maintenance',
+                    'User experience optimization',
+                    'Design system evolution'
+                ],
+                triggers: [
+                    'UI/UX design requests',
+                    'Component library updates',
+                    'Brand consistency reviews',
+                    'User feedback on interface'
+                ],
+                cadence: 'Event-driven, 1-2 day turnaround',
+                status: 'active',
+                currentTask: 'Designing new dashboard layout'
+            },
+            {
+                id: 'spark',
+                name: 'Spark',
+                emoji: '⚡',
+                role: 'Research & Analysis',
+                department: 'Analytics',
+                color: '#ffe930',
+                responsibilities: [
+                    'Market research and trend analysis',
+                    'Competitor analysis',
+                    'Data analysis and reporting',
+                    'Strategic insights generation'
+                ],
+                triggers: [
+                    'Research requests',
+                    'Market analysis needed',
+                    'Data analysis requests',
+                    'Competitive intelligence requests'
+                ],
+                cadence: 'Weekly reports + ad-hoc requests',
+                status: 'active',
+                currentTask: 'Analyzing competitor feature releases'
+            }
+        ];
+
+        // Render Agent Cards
+        function renderAgents() {
+            const grid = document.getElementById('agentsGrid');
+            grid.innerHTML = agents.map(agent => `
+                <div class="agent-card ${agent.id}" onclick="toggleAgentDetails(this)">
+                    <div class="agent-header">
+                        <div class="agent-info">
+                            <div class="agent-emoji">${agent.emoji}</div>
+                            <div class="agent-title">
+                                <div class="agent-name">${agent.name}</div>
+                                <div class="agent-role">${agent.role}</div>
+                            </div>
+                        </div>
+                        <div class="agent-status">
+                            <div class="status-dot ${agent.status}" style="background-color: ${agent.color}; animation: ${agent.status === 'active' ? 'pulse 2s infinite' : agent.status === 'idle' ? 'pulse-idle 2s infinite' : 'none'};"></div>
+                            <span>${agent.status.charAt(0).toUpperCase() + agent.status.slice(1)}</span>
+                        </div>
+                    </div>
+
+                    <span class="agent-department">${agent.department}</span>
+
+                    <div class="agent-section">
+                        <span class="agent-section-title">Responsibilities</span>
+                        <ul class="agent-responsibilities">
+                            ${agent.responsibilities.map(r => `<li>${r}</li>`).join('')}
+                        </ul>
+                    </div>
+
+                    <div class="agent-section">
+                        <span class="agent-section-title">Trigger Conditions</span>
+                        <div class="agent-triggers">
+                            ${agent.triggers.map(t => `• ${t}`).join('<br>')}
+                        </div>
+                    </div>
+
+                    <div class="agent-section">
+                        <span class="agent-section-title">Cadence</span>
+                        <div class="agent-cadence">${agent.cadence}</div>
+                    </div>
+
+                    <div class="agent-current-task">
+                        <strong style="color: #3ebaf4;">Current Task:</strong>
+                        <span class="${agent.currentTask ? '' : 'agent-current-task-empty'}">${agent.currentTask || 'None - Standing by'}</span>
+                    </div>
+
+                    <div class="agent-details-full">
+                        <h4>Full Profile</h4>
+                        <p><strong>Agent ID:</strong> ${agent.id}</p>
+                        <p><strong>Department:</strong> ${agent.department}</p>
+                        <p><strong>Primary Color:</strong> <span style="color: ${agent.color};">${agent.color}</span></p>
+                        <p><strong>Status:</strong> <span style="color: ${agent.status === 'active' ? '#00d49b' : agent.status === 'idle' ? '#ffb800' : '#666'};">${agent.status.toUpperCase()}</span></p>
+                        <p style="margin-top: 16px; line-height: 1.8;">
+                            ${agent.name} is a core member of the HiveControl swarm, specialized in ${agent.role.toLowerCase()}.
+                            The agent operates autonomously within its domain, responds to work triggers within ${agent.cadence.toLowerCase()},
+                            and maintains communication with the Orion orchestrator for coordination and priority adjustment.
+                        </p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Toggle Agent Details Expansion
+        function toggleAgentDetails(element) {
+            const wasExpanded = element.classList.contains('expanded');
+            document.querySelectorAll('.agent-card.expanded').forEach(card => {
+                card.classList.remove('expanded');
+            });
+            if (!wasExpanded) {
+                element.classList.add('expanded');
+            }
+        }
+
+        // Modal Functions
+        function openPlaybookModal() {
+            document.getElementById('playbookModal').classList.add('show');
+        }
+
+        function closePlaybookModal() {
+            document.getElementById('playbookModal').classList.remove('show');
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('playbookModal');
+            if (event.target === modal) {
+                modal.classList.remove('show');
+            }
+        };
+
+        // Simulate WebSocket status updates (in real implementation, connect to actual WS server)
+        function updateAgentStatus() {
+            // This would connect to WebSocket for real-time updates
+            // For now, just keeping current states
+            renderAgents();
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            renderAgents();
+            // Would connect to WebSocket here
+            // new WebSocket('ws://localhost:8080/agents').onmessage = (e) => updateAgentStatus();
+        });
+
+        // ── Gateway Event Bridge (receives events from parent HiveControl shell) ──
+        window.addEventListener('message', (event) => {
+            try {
+                if (event.data && event.data.type === 'hiveEvent') {
+                    const { event: evt, payload } = event.data;
+                    handleGatewayEvent(evt, payload);
+                }
+            } catch (_) {}
+        });
+
+        function handleGatewayEvent(event, payload) {
+            switch (event) {
+                case 'heartbeat':
+                    // Update any live status indicators
+                    break;
+                case 'agent':
+                    // Agent status change
+                    break;
+                case 'health':
+                    // Gateway health update
+                    break;
+                default:
+                    break;
+            }
+        }
+    </script>
+</body>
+</html>
