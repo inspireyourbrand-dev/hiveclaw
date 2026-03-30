@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <defs>
+    <linearGradient id="hc-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3ebaf4;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#df30ff;stop-opacity:1" />
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <!-- Hexagon -->
+  <polygon points="60,5 110,32.5 110,87.5 60,115 10,87.5 10,32.5"
+           fill="none" stroke="url(#hc-grad)" stroke-width="3" filter="url(#glow)"/>
+  <!-- Inner hexagon -->
+  <polygon points="60,20 95,40 95,80 60,100 25,80 25,40"
+           fill="rgba(62,186,244,0.08)" stroke="url(#hc-grad)" stroke-width="1" opacity="0.6"/>
+  <!-- HC text -->
+  <text x="60" y="68" text-anchor="middle" font-family="sans-serif" font-weight="700"
+        font-size="32" fill="url(#hc-grad)" filter="url(#glow)">HC</text>
+</svg>
