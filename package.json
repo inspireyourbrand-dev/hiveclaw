@@ -1,0 +1,64 @@
+{
+  "name": "hiveclaw",
+  "version": "1.0.0",
+  "description": "HiveClaw \u2014 Your AI Agent Swarm Command Center. Enhanced OpenClaw soft fork with HiveControl OS dashboard, HiveWorkflow engine, and persistent memory. By HivePowered.AI.",
+  "type": "module",
+  "main": "gateway/index.js",
+  "bin": {
+    "hiveclaw": "./bin/hiveclaw.js"
+  },
+  "scripts": {
+    "start": "node gateway/index.js",
+    "dev": "node gateway/index.js --verbose",
+    "install:openclaw": "npm install -g openclaw@latest",
+    "install:deps": "npm install",
+    "setup": "node cli/index.js setup",
+    "doctor": "node cli/index.js doctor",
+    "status": "node cli/index.js status",
+    "memory:search": "node cli/index.js memory search",
+    "build": "bash scripts/build-hivecontrol.sh",
+    "sync-upstream": "bash scripts/sync-upstream.sh",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f"
+  },
+  "keywords": [
+    "ai",
+    "agents",
+    "openclaw",
+    "hiveclaw",
+    "hivecontrol",
+    "agent-swarm",
+    "workflow",
+    "memory",
+    "automation",
+    "hivepowered"
+  ],
+  "author": "HivePowered.AI <ai@hivepowered.ai>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/inspireyourbrand-dev/hiveclaw"
+  },
+  "homepage": "https://hivepowered.ai",
+  "engines": {
+    "node": ">=22.14.0"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.7.0",
+    "dotenv": "^16.4.0",
+    "express": "^4.21.0",
+    "ws": "^8.18.0"
+  },
+  "optionalDependencies": {
+    "better-sqlite3": "^11.7.0"
+  },
+  "peerDependencies": {
+    "openclaw": ">=0.1.0"
+  },
+  "peerDependenciesMeta": {
+    "openclaw": {
+      "optional": true
+    }
+  }
+}
