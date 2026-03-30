@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Office - HiveControl OS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #0a0a0a;
+            color: #e0e0e0;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .office-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .office-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid rgba(62, 186, 244, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(to bottom, #1a1a1a, transparent);
+        }
+
+        .header-title {
+            font-family: 'Rajdhani', monospace;
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(90deg, #3ebaf4, #df30ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .time-display {
+            font-size: 14px;
+            color: #3ebaf4;
+            font-family: 'Rajdhani', monospace;
+        }
+
+        /* Main Content Area */
+        .office-content {
+            flex: 1;
+            display: flex;
+            gap: 16px;
+            padding: 16px;
+            overflow: hidden;
+        }
+
+        /* Floor Plan */
+        .floor-plan-wrapper {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            background: radial-gradient(circle at center, #0f0f0f 0%, #0a0a0a 100%);
+            border: 1px solid rgba(62, 186, 244, 0.15);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .floor-plan {
+            position: relative;
+            width: 600px;
+            height: 500px;
+            background:
+                repeating-linear-gradient(
+                    0deg,
+                    rgba(62, 186, 244, 0.03) 0px,
+                    rgba(62, 186, 244, 0.03) 1px,
+                    transparent 1px,
+                    transparent 40px
+                ),
+                repeating-linear-gradient(
+                    90deg,
+                    rgba(62, 186, 244, 0.03) 0px,
+                    rgba(62, 186, 244, 0.03) 1px,
+                    transparent 1px,
+                    transparent 40px
+                );
+            border-radius: 4px;
+        }
+
+        /* CEO Office (Orion) */
+        .ceo-office {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 80px;
+            background: rgba(255, 233, 48, 0.1);
+            border: 2px solid #ffe930;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .ceo-office:hover {
+            box-shadow: 0 0 20px rgba(255, 233, 48, 0.4);
+        }
+
+        .ceo-office.hex-flash {
+            animation: hexFlash 0.6s ease-out;
+        }
+
+        @keyframes hexFlash {
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 233, 48, 0.8),
+                            0 0 20px rgba(255, 233, 48, 0.4);
+            }
+            50% {
+                box-shadow: 0 0 0 15px rgba(255, 233, 48, 0),
+                            0 0 40px rgba(255, 233, 48, 0.6);
+            }
+            100% {
+                box-shadow: 0 0 0 30px rgba(255, 233, 48, 0),
+                            0 0 20px rgba(255, 233, 48, 0);
+            }
+        }
+
+        /* Meeting Area */
+        .meeting-area {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100px;
+            height: 100px;
+            clip-path: polygon(50% 0%, 93.3% 25%, 93.3% 75%, 50% 100%, 6.7% 75%, 6.7% 25%);
+            background: rgba(62, 186, 244, 0.08);
+            border: 2px solid rgba(62, 186, 244, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: #3ebaf4;
+            font-family: 'Rajdhani', monospace;
+            font-weight: 600;
+        }
+
+        /* Desk Grid */
+        .desk-grid {
+            position: absolute;
+            top: 140px;
+            left: 20px;
+            width: 540px;
+            height: 320px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .desk {
+            position: relative;
+            background: rgba(26, 26, 26, 0.8);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .desk:hover {
+            border-color: rgba(255, 255, 255, 0.3);
+            background: rgba(26, 26, 26, 1);
+        }
+
+        .desk-label {
+            font-family: 'Rajdhani', monospace;
+            font-size: 11px;
+            color: #888;
+            position: absolute;
+            bottom: 4px;
+            left: 4px;
+        }
+
+        /* Agent Avatar */
+        .agent-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 20px;
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 5;
+        }
+
+        .agent-avatar::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            opacity: 0;
+        }
+
+        /* Agent-specific colors */
+        .agent-orion { background: #ffe930; color: #0a0a0a; }
+        .agent-atlas { background: #3ebaf4; color: #0a0a0a; }
+        .agent-forge { background: #ff6b35; color: #fff; }
+        .agent-patch { background: #ff4757; color: #fff; }
+        .agent-quill { background: #df30ff; color: #fff; }
+        .agent-cipher { background: #00d49b; color: #0a0a0a; }
+        .agent-pixel { background: #ff69b4; color: #fff; }
+        .agent-spark { background: #4a90d9; color: #fff; }
+
+        /* Status animations */
+        .agent-avatar.working {
+            animation: workingPulse 1.5s ease-in-out infinite;
+        }
+
+        .agent-avatar.working::before {
+            animation: workingGlow 1.5s ease-in-out infinite;
+        }
+
+        @keyframes workingPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        @keyframes workingGlow {
+            0%, 100% {
+                box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
+                opacity: 1;
+            }
+            50% {
+                box-shadow: 0 0 0 12px rgba(255, 255, 255, 0.1);
+                opacity: 0;
+            }
+        }
+
+        .agent-avatar.idle {
+            opacity: 0.5;
+        }
+
+        .agent-avatar.in-meeting {
+            animation: meetingFloat 2s ease-in-out infinite;
+        }
+
+        @keyframes meetingFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-4px); }
+        }
+
+        .agent-avatar.offline {
+            background: #444 !important;
+            color: #888;
+        }
+
+        /* Typing indicator */
+        .typing-dots {
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 3px;
+        }
+
+        .typing-dot {
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: currentColor;
+            animation: typingBounce 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typingBounce {
+            0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
+            30% { opacity: 1; transform: translateY(-8px); }
+        }
+
+        /* Server Room */
+        .server-room {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 80px;
+            height: 80px;
+            background: rgba(62, 186, 244, 0.1);
+            border: 2px solid #3ebaf4;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            color: #3ebaf4;
+            font-family: 'Rajdhani', monospace;
+            font-weight: 600;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .server-lights {
+            display: flex;
+            gap: 4px;
+        }
+
+        .server-light {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #3ebaf4;
+            animation: serverPulse 2s ease-in-out infinite;
+        }
+
+        .server-light:nth-child(2) { animation-delay: 0.4s; }
+        .server-light:nth-child(3) { animation-delay: 0.8s; }
+
+        @keyframes serverPulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        /* Sidebar - Activity Log */
+        .activity-sidebar {
+            width: 280px;
+            background: rgba(26, 26, 26, 0.6);
+            border: 1px solid rgba(62, 186, 244, 0.15);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .activity-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(62, 186, 244, 0.15);
+            font-family: 'Rajdhani', monospace;
+            font-size: 13px;
+            font-weight: 600;
+            color: #3ebaf4;
+        }
+
+        .activity-log {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .activity-entry {
+            font-size: 12px;
+            color: #b0b0b0;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.02);
+            border-left: 2px solid;
+            border-radius: 2px;
+            animation: slideInLog 0.4s ease-out;
+        }
+
+        @keyframes slideInLog {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .activity-entry.working { border-color: #ffe930; }
+        .activity-entry.meeting { border-color: #3ebaf4; }
+        .activity-entry.offline { border-color: #666; }
+
+        .activity-time {
+            font-size: 11px;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        /* Scrollbar styling */
+        .activity-log::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .activity-log::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .activity-log::-webkit-scrollbar-thumb {
+            background: rgba(62, 186, 244, 0.3);
+            border-radius: 3px;
+        }
+
+        .activity-log::-webkit-scrollbar-thumb:hover {
+            background: rgba(62, 186, 244, 0.5);
+        }
+
+        /* Tooltip */
+        .tooltip {
+            position: absolute;
+            background: rgba(10, 10, 10, 0.95);
+            border: 1px solid rgba(62, 186, 244, 0.3);
+            border-radius: 4px;
+            padding: 8px 12px;
+            font-size: 11px;
+            color: #e0e0e0;
+            white-space: nowrap;
+            pointer-events: none;
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(-5px);
+            transition: all 0.2s ease;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .tooltip.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 1024px) {
+            .office-content {
+                flex-direction: column;
+            }
+
+            .floor-plan-wrapper {
+                display: none;
+            }
+
+            .activity-sidebar {
+                width: 100%;
+                max-height: 300px;
+            }
+
+            /* Show list view instead */
+            .mobile-list-view {
+                flex: 1;
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+                overflow-y: auto;
+                padding: 16px;
+                background: transparent;
+            }
+
+            .mobile-agent-card {
+                background: rgba(26, 26, 26, 0.8);
+                border: 1px solid rgba(62, 186, 244, 0.15);
+                border-radius: 6px;
+                padding: 12px;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+
+            .mobile-agent-card:hover {
+                border-color: rgba(62, 186, 244, 0.4);
+                background: rgba(26, 26, 26, 1);
+            }
+
+            .mobile-agent-avatar {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: 700;
+                flex-shrink: 0;
+            }
+
+            .mobile-agent-info {
+                flex: 1;
+                min-width: 0;
+            }
+
+            .mobile-agent-name {
+                font-family: 'Rajdhani', monospace;
+                font-size: 13px;
+                font-weight: 600;
+                margin-bottom: 2px;
+            }
+
+            .mobile-agent-status {
+                font-size: 11px;
+                color: #888;
+            }
+        }
+
+        /* Particle effects container */
+        .particles-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            z-index: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="office-container">
+        <div class="office-header">
+            <div class="header-title">OFFICE</div>
+            <div class="time-display" id="timeDisplay">00:00</div>
+        </div>
+
+        <div class="office-content">
+            <!-- Floor Plan for desktop -->
+            <div class="floor-plan-wrapper">
+                <div class="floor-plan">
+                    <div class="ceo-office" id="ceoOffice">
+                        <div class="agent-avatar agent-orion">O</div>
+                    </div>
+
+                    <div class="meeting-area">NEXUS</div>
+
+                    <div class="desk-grid" id="deskGrid">
+                        <!-- Desks will be generated by JS -->
+                    </div>
+
+                    <div class="server-room">
+                        ATLAS<br><span class="server-lights">
+                            <div class="server-light"></div>
+                            <div class="server-light"></div>
+                            <div class="server-light"></div>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mobile list view (hidden by default) -->
+            <div class="mobile-list-view" id="mobileListView" style="display: none;"></div>
+
+            <!-- Activity Log Sidebar -->
+            <div class="activity-sidebar">
+                <div class="activity-header">ACTIVITY LOG</div>
+                <div class="activity-log" id="activityLog"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="tooltip" id="tooltip"></div>
+
+    <script>
+        // Agent data
+        const agents = [
+            { name: 'Forge', role: 'Builder', color: '#ff6b35', className: 'agent-forge', letter: 'F' },
+            { name: 'Patch', role: 'Fixer', color: '#ff4757', className: 'agent-patch', letter: 'P' },
+            { name: 'Quill', role: 'Writer', color: '#df30ff', className: 'agent-quill', letter: 'Q' },
+            { name: 'Cipher', role: 'Analyst', color: '#00d49b', className: 'agent-cipher', letter: 'C' },
+            { name: 'Pixel', role: 'Designer', color: '#ff69b4', className: 'agent-pixel', letter: 'X' },
+            { name: 'Spark', role: 'Optimizer', color: '#4a90d9', className: 'agent-spark', letter: 'S' },
+            { name: 'Atlas', role: 'Infrastructure', color: '#3ebaf4', className: 'agent-atlas', letter: 'A' },
+        ];
+
+        const tasks = [
+            'Build Calendar Screen',
+            'Fix Login Bug',
+            'Write Newsletter Draft',
+            'Analyze Metrics',
+            'Design Dashboard',
+            'Optimize Database',
+            'Review Code Changes',
+            'Update Documentation',
+        ];
+
+        const statuses = ['working', 'idle', 'in-meeting', 'offline'];
+
+        // State
+        let agentStates = {};
+        let activityEntries = [];
+
+        // Initialize agent states
+        function initializeAgents() {
+            agents.forEach((agent, idx) => {
+                agentStates[agent.name] = {
+                    agent,
+                    status: idx === 0 ? 'working' : 'idle',
+                    task: idx === 0 ? tasks[0] : null,
+                    lastActive: new Date(),
+                };
+            });
+        }
+
+        // Create desk elements
+        function createDesks() {
+            const grid = document.getElementById('deskGrid');
+            grid.innerHTML = '';
+            agents.slice(0, 6).forEach((agent, idx) => {
+                const desk = document.createElement('div');
+                desk.className = 'desk';
+                desk.innerHTML = `
+                    <div class="agent-avatar ${agent.className}" id="avatar-${agent.name}">
+                        ${agent.letter}
+                    </div>
+                    <div class="desk-label">${agent.name}</div>
+                `;
+                desk.addEventListener('mouseenter', (e) => showTooltip(e, agent.name));
+                desk.addEventListener('mouseleave', hideTooltip);
+                desk.addEventListener('click', () => handleDeskClick(agent.name));
+                grid.appendChild(desk);
+            });
+        }
+
+        // Create mobile list view
+        function createMobileList() {
+            const mobileView = document.getElementById('mobileListView');
+            mobileView.innerHTML = '';
+            agents.forEach((agent) => {
+                const card = document.createElement('div');
+                card.className = 'mobile-agent-card';
+                card.innerHTML = `
+                    <div class="mobile-agent-avatar ${agent.className}">
+                        ${agent.letter}
+                    </div>
+                    <div class="mobile-agent-info">
+                        <div class="mobile-agent-name">${agent.name}</div>
+                        <div class="mobile-agent-status" id="status-${agent.name}">Idle</div>
+                    </div>
+                `;
+                card.addEventListener('click', () => handleDeskClick(agent.name));
+                mobileView.appendChild(card);
+            });
+        }
+
+        // Show tooltip
+        function showTooltip(e, agentName) {
+            const state = agentStates[agentName];
+            const tooltip = document.getElementById('tooltip');
+
+            let statusText = state.status.charAt(0).toUpperCase() + state.status.slice(1);
+            let content = `${agentName} (${state.agent.role})<br>${statusText}`;
+
+            if (state.task) {
+                content += `<br>📋 ${state.task}`;
+            }
+
+            const mins = Math.floor((Date.now() - state.lastActive.getTime()) / 60000);
+            content += `<br><span style="color: #666; font-size: 10px;">Active ${mins}m ago</span>`;
+
+            tooltip.innerHTML = content;
+            tooltip.classList.add('visible');
+
+            const rect = e.target.getBoundingClientRect();
+            tooltip.style.left = (rect.left + rect.width / 2 - tooltip.offsetWidth / 2) + 'px';
+            tooltip.style.top = (rect.top - 50) + 'px';
+        }
+
+        function hideTooltip() {
+            document.getElementById('tooltip').classList.remove('visible');
+        }
+
+        // Handle desk click - Easter egg for CEO office
+        function handleDeskClick(agentName) {
+            if (agentName === 'Orion') {
+                const ceoOffice = document.getElementById('ceoOffice');
+                ceoOffice.classList.remove('hex-flash');
+                void ceoOffice.offsetWidth; // Trigger reflow
+                ceoOffice.classList.add('hex-flash');
+            }
+        }
+
+        // Update agent status
+        function updateAgentStatus(agentName) {
+            const state = agentStates[agentName];
+            const currentStatus = state.status;
+            const statuses = ['working', 'idle', 'in-meeting'];
+            const nextStatus = statuses[(statuses.indexOf(currentStatus) + 1) % statuses.length];
+
+            state.status = nextStatus;
+            state.lastActive = new Date();
+
+            if (nextStatus === 'working') {
+                state.task = tasks[Math.floor(Math.random() * tasks.length)];
+            } else {
+                state.task = null;
+            }
+
+            addActivity(agentName, nextStatus, state.task);
+            updateDisplay(agentName);
+        }
+
+        // Update display
+        function updateDisplay(agentName) {
+            const state = agentStates[agentName];
+            const avatar = document.getElementById(`avatar-${agentName}`);
+
+            if (!avatar) return;
+
+            avatar.className = `agent-avatar ${state.agent.className}`;
+            avatar.innerHTML = state.agent.letter;
+
+            // Add status class and animations
+            avatar.classList.add(state.status);
+
+            // Add typing dots if working
+            if (state.status === 'working') {
+                const existingDots = avatar.querySelector('.typing-dots');
+                if (!existingDots) {
+                    const dots = document.createElement('div');
+                    dots.className = 'typing-dots';
+                    dots.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
+                    avatar.appendChild(dots);
+                }
+            } else {
+                const dots = avatar.querySelector('.typing-dots');
+                if (dots) dots.remove();
+            }
+
+            // Update mobile status
+            const mobileStatus = document.getElementById(`status-${agentName}`);
+            if (mobileStatus) {
+                if (state.status === 'working') {
+                    mobileStatus.textContent = `Working on ${state.task}`;
+                } else {
+                    mobileStatus.textContent = state.status.charAt(0).toUpperCase() + state.status.slice(1);
+                }
+            }
+        }
+
+        // Activity log
+        function addActivity(agentName, status, task) {
+            const time = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+            let message = '';
+
+            if (status === 'working') {
+                message = `${agentName} sat down to work on '<em>${task}</em>'`;
+            } else if (status === 'in-meeting') {
+                message = `${agentName} joined the meeting`;
+            } else if (status === 'idle') {
+                message = `${agentName} is taking a break`;
+            }
+
+            activityEntries.unshift({ message, status, time });
+            if (activityEntries.length > 12) activityEntries.pop();
+
+            renderActivityLog();
+        }
+
+        function renderActivityLog() {
+            const log = document.getElementById('activityLog');
+            log.innerHTML = activityEntries.map((entry) => `
+                <div class="activity-entry ${entry.status}">
+                    ${entry.message}
+                    <div class="activity-time">${entry.time}</div>
+                </div>
+            `).join('');
+        }
+
+        // Update time display based on actual time
+        function updateTime() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const mins = String(now.getMinutes()).padStart(2, '0');
+            document.getElementById('timeDisplay').textContent = `${hours}:${mins}`;
+
+            // Adjust ambient lighting based on time
+            const hour = now.getHours();
+            const container = document.querySelector('.floor-plan-wrapper');
+            if (hour >= 18 || hour < 6) {
+                container.style.opacity = '0.7';
+            } else if (hour >= 6 && hour < 9) {
+                container.style.opacity = '0.85';
+            } else {
+                container.style.opacity = '1';
+            }
+        }
+
+        // Lifecycle: random status changes
+        function startLifecycle() {
+            setInterval(() => {
+                if (Math.random() > 0.7) {
+                    const randomAgent = agents[Math.floor(Math.random() * agents.length)];
+                    updateAgentStatus(randomAgent.name);
+                }
+            }, 8000 + Math.random() * 12000);
+        }
+
+        // WebSocket attempt for real data
+        function attemptWebSocketConnection() {
+            try {
+                if (window.parent && window.parent.agentStates) {
+                    // Parent window has real data
+                    const parentStates = window.parent.agentStates;
+                    Object.keys(parentStates).forEach((agentName) => {
+                        if (agentStates[agentName]) {
+                            agentStates[agentName].status = parentStates[agentName].status || 'idle';
+                            agentStates[agentName].task = parentStates[agentName].task || null;
+                            updateDisplay(agentName);
+                        }
+                    });
+                }
+            } catch (e) {
+                // Silently fail - use simulated data
+            }
+        }
+
+        // Handle responsive resize
+        function handleResize() {
+            const floorPlan = document.querySelector('.floor-plan-wrapper');
+            const mobileList = document.getElementById('mobileListView');
+
+            if (window.innerWidth <= 1024) {
+                if (floorPlan) floorPlan.style.display = 'none';
+                if (mobileList) mobileList.style.display = 'grid';
+            } else {
+                if (floorPlan) floorPlan.style.display = 'flex';
+                if (mobileList) mobileList.style.display = 'none';
+            }
+        }
+
+        // Initialize
+        function init() {
+            initializeAgents();
+            createDesks();
+            createMobileList();
+            updateTime();
+            renderActivityLog();
+
+            // Initial activity
+            agents.forEach((agent) => {
+                if (agentStates[agent.name].status === 'working') {
+                    addActivity(agent.name, 'working', agentStates[agent.name].task);
+                }
+            });
+
+            // Start updates
+            setInterval(updateTime, 10000);
+            startLifecycle();
+            window.addEventListener('resize', handleResize);
+
+            // Try to get real data
+            attemptWebSocketConnection();
+
+            // Handle initial responsive state
+            handleResize();
+
+            // Render all agents
+            agents.forEach((agent) => updateDisplay(agent.name));
+        }
+
+        // Start when ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+
+        // ── Gateway Event Bridge (receives events from parent HiveControl shell) ──
+        window.addEventListener('message', (event) => {
+            try {
+                if (event.data && event.data.type === 'hiveEvent') {
+                    const { event: evt, payload } = event.data;
+                    handleGatewayEvent(evt, payload);
+                }
+            } catch (_) {}
+        });
+
+        function handleGatewayEvent(event, payload) {
+            switch (event) {
+                case 'heartbeat':
+                    // Update any live status indicators
+                    break;
+                case 'agent':
+                    // Agent status change
+                    break;
+                case 'health':
+                    // Gateway health update
+                    break;
+                default:
+                    break;
+            }
+        }
+    </script>
+</body>
+</html>
