@@ -1,0 +1,1776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HiveWorkflow - HiveControl OS</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #0a0a0a;
+            color: #e0e0e0;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        /* ==================== COLORS & THEME ==================== */
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #1a1a1a;
+            --bg-tertiary: #111;
+            --cyan: #3ebaf4;
+            --purple: #df30ff;
+            --yellow: #ffe930;
+            --green: #00d49b;
+            --red: #ff4757;
+            --gray: #404040;
+            --text-primary: #e0e0e0;
+            --text-secondary: #a0a0a0;
+            --border: #2a2a2a;
+        }
+
+        /* ==================== HEADER ==================== */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 24px;
+            background: linear-gradient(180deg, #1a1a1a 0%, #0f0f0f 100%);
+            border-bottom: 1px solid var(--border);
+            height: 70px;
+            flex-shrink: 0;
+        }
+
+        .header-title {
+            font-family: 'Rajdhani', monospace;
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--cyan), var(--purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 1px;
+        }
+
+        .header-center {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+            justify-content: center;
+        }
+
+        .mode-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--cyan);
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--cyan);
+            letter-spacing: 0.5px;
+        }
+
+        .mode-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--green);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        .header-capacity {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-left: auto;
+        }
+
+        .capacity-ring {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+            position: relative;
+        }
+
+        .capacity-circle {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 2px solid var(--border);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--cyan);
+            background: conic-gradient(var(--green) 0deg, var(--green) 180deg, transparent 180deg);
+        }
+
+        .capacity-circle.warm {
+            background: conic-gradient(var(--yellow) 0deg, var(--yellow) 200deg, transparent 200deg);
+        }
+
+        .capacity-circle.hot {
+            background: conic-gradient(var(--red) 0deg, var(--red) 240deg, transparent 240deg);
+        }
+
+        /* ==================== MAIN CONTAINER ==================== */
+        .container {
+            display: flex;
+            height: calc(100vh - 70px);
+            gap: 1px;
+            background: var(--border);
+        }
+
+        /* ==================== LEFT PANEL - SWARM MONITOR ==================== */
+        .left-panel {
+            width: 240px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            overflow-x: hidden;
+            flex-shrink: 0;
+        }
+
+        .left-panel::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .left-panel::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .left-panel::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
+
+        .left-panel::-webkit-scrollbar-thumb:hover {
+            background: var(--gray);
+        }
+
+        .panel-section {
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .section-title {
+            font-family: 'Rajdhani', monospace;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--cyan);
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        /* Hardware Stats */
+        .stats-grid {
+            display: grid;
+            gap: 12px;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .stat-label {
+            font-size: 10px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-family: 'Rajdhani', monospace;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--cyan);
+        }
+
+        .stat-bar {
+            width: 100%;
+            height: 4px;
+            background: var(--bg-tertiary);
+            border-radius: 2px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .stat-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--cyan), var(--purple));
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+
+        .stat-bar-fill.warm {
+            background: linear-gradient(90deg, var(--yellow), #ff9100);
+        }
+
+        .stat-bar-fill.hot {
+            background: var(--red);
+        }
+
+        /* Agent Cards */
+        .agent-card {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .agent-card:hover {
+            background: #1a1a1a;
+            border-color: var(--cyan);
+        }
+
+        .agent-status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--green);
+            flex-shrink: 0;
+            box-shadow: 0 0 8px var(--green);
+        }
+
+        .agent-status-dot.idle {
+            background: var(--gray);
+            box-shadow: 0 0 4px var(--gray);
+            opacity: 0.5;
+        }
+
+        .agent-status-dot.offline {
+            background: var(--text-secondary);
+            opacity: 0.3;
+            box-shadow: none;
+        }
+
+        .agent-status-dot.working {
+            animation: pulse 1s infinite;
+            box-shadow: 0 0 12px var(--cyan);
+        }
+
+        .agent-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .agent-name {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .agent-task {
+            font-size: 9px;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-top: 2px;
+        }
+
+        .agent-badge {
+            font-size: 7px;
+            background: var(--purple);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+
+        /* ==================== CENTER PANEL - CHAT ==================== */
+        .center-panel {
+            flex: 1;
+            background: var(--bg-primary);
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid var(--border);
+        }
+
+        .chat-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border);
+            background: linear-gradient(90deg, transparent, rgba(62, 186, 244, 0.03));
+            height: 70px;
+            flex-shrink: 0;
+        }
+
+        .orion-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 2px;
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: #000;
+            font-size: 18px;
+            flex-shrink: 0;
+            box-shadow: 0 0 16px rgba(255, 217, 0, 0.4);
+        }
+
+        .chat-header-text {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+        }
+
+        .chat-title {
+            font-family: 'Rajdhani', monospace;
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* Chat Messages */
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .chat-messages::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb:hover {
+            background: var(--gray);
+        }
+
+        .welcome-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 24px;
+            padding: 40px 24px;
+        }
+
+        .welcome-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 4px;
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            font-weight: 700;
+            color: #000;
+            box-shadow: 0 0 32px rgba(255, 217, 0, 0.3);
+        }
+
+        .welcome-heading {
+            font-family: 'Rajdhani', monospace;
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--cyan), var(--purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-align: center;
+        }
+
+        .suggestion-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .suggestion-card {
+            padding: 16px;
+            background: linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary));
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .suggestion-card:hover {
+            border-color: var(--cyan);
+            background: linear-gradient(135deg, #1a2a2a, #0f1a1a);
+            transform: translateY(-2px);
+        }
+
+        .suggestion-icon {
+            font-size: 24px;
+        }
+
+        .suggestion-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .suggestion-subtitle {
+            font-size: 10px;
+            color: var(--text-secondary);
+        }
+
+        /* Message Bubbles */
+        .message {
+            display: flex;
+            gap: 12px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .message.orion {
+            justify-content: flex-start;
+        }
+
+        .message-bubble {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 8px;
+            border-left: 3px solid transparent;
+            word-wrap: break-word;
+        }
+
+        .message.user .message-bubble {
+            background: linear-gradient(135deg, #1a2a3a, #1a1a2a);
+            border-left-color: var(--cyan);
+            color: var(--text-primary);
+        }
+
+        .message.orion .message-bubble {
+            background: var(--bg-tertiary);
+            border-left-color: #ffd700;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .orion-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 2px;
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #000;
+            font-weight: 700;
+            flex-shrink: 0;
+            font-size: 16px;
+            box-shadow: 0 0 12px rgba(255, 217, 0, 0.3);
+        }
+
+        .message-content {
+            flex: 1;
+        }
+
+        .agent-log {
+            padding: 8px 12px;
+            background: rgba(62, 186, 244, 0.05);
+            border: 1px solid rgba(62, 186, 244, 0.2);
+            border-radius: 4px;
+            font-size: 11px;
+            font-family: 'Rajdhani', monospace;
+            margin-left: 44px;
+            display: flex;
+            gap: 8px;
+            align-items: flex-start;
+            color: var(--cyan);
+        }
+
+        .agent-log-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            margin-top: 4px;
+        }
+
+        /* Workflow Decomposition */
+        .workflow-plan {
+            padding: 16px;
+            background: linear-gradient(135deg, rgba(62, 186, 244, 0.1), rgba(223, 48, 255, 0.05));
+            border: 1px solid rgba(62, 186, 244, 0.3);
+            border-radius: 8px;
+            margin: 0 0 16px 0;
+        }
+
+        .workflow-plan-title {
+            font-family: 'Rajdhani', monospace;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--cyan);
+            margin-bottom: 12px;
+            letter-spacing: 1px;
+        }
+
+        .workflow-tasks {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .task-row {
+            display: grid;
+            grid-template-columns: 24px 1fr auto auto;
+            gap: 12px;
+            align-items: center;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
+            font-size: 11px;
+            animation: slideIn 0.4s ease;
+        }
+
+        .task-number {
+            font-family: 'Rajdhani', monospace;
+            font-weight: 600;
+            color: var(--cyan);
+            font-size: 10px;
+        }
+
+        .task-title {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .task-status {
+            font-size: 14px;
+            color: var(--cyan);
+        }
+
+        .task-status.running {
+            animation: spin 1s linear infinite;
+            color: var(--yellow);
+        }
+
+        .task-status.done {
+            color: var(--green);
+        }
+
+        .task-status.failed {
+            color: var(--red);
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .task-agents {
+            display: flex;
+            gap: 6px;
+        }
+
+        .agent-badge-small {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            border-radius: 2px;
+            background: var(--cyan);
+            color: #000;
+            font-size: 9px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .workflow-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            font-size: 10px;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(62, 186, 244, 0.2);
+        }
+
+        .workflow-stat {
+            display: flex;
+            gap: 4px;
+        }
+
+        .workflow-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-workflow {
+            flex: 1;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-family: 'Rajdhani', monospace;
+        }
+
+        .btn-start {
+            background: linear-gradient(90deg, var(--cyan), var(--purple));
+            color: #000;
+        }
+
+        .btn-start:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(62, 186, 244, 0.3);
+        }
+
+        .btn-edit {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--cyan);
+        }
+
+        .btn-edit:hover {
+            border-color: var(--cyan);
+            background: rgba(62, 186, 244, 0.1);
+        }
+
+        /* Typing Indicator */
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+            padding: 12px;
+        }
+
+        .typing-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--cyan);
+            animation: typingBounce 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typingBounce {
+            0%, 60%, 100% {
+                opacity: 0.3;
+                transform: translateY(0);
+            }
+            30% {
+                opacity: 1;
+                transform: translateY(-8px);
+            }
+        }
+
+        /* Input Bar */
+        .chat-input-area {
+            padding: 16px 24px;
+            border-top: 1px solid var(--border);
+            background: linear-gradient(180deg, transparent, rgba(26, 26, 26, 0.5));
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+            flex-shrink: 0;
+        }
+
+        .input-wrapper {
+            flex: 1;
+            display: flex;
+            gap: 8px;
+            align-items: flex-end;
+        }
+
+        .chat-textarea {
+            flex: 1;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 12px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 13px;
+            color: var(--text-primary);
+            resize: none;
+            max-height: 100px;
+            min-height: 40px;
+            transition: border-color 0.2s ease;
+        }
+
+        .chat-textarea:focus {
+            outline: none;
+            border-color: var(--cyan);
+            box-shadow: 0 0 12px rgba(62, 186, 244, 0.2);
+        }
+
+        .chat-textarea::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .btn-attach {
+            width: 40px;
+            height: 40px;
+            border: 1px solid var(--border);
+            background: var(--bg-tertiary);
+            color: var(--cyan);
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .btn-attach:hover {
+            border-color: var(--cyan);
+            background: rgba(62, 186, 244, 0.1);
+        }
+
+        .btn-send {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(90deg, var(--cyan), var(--purple));
+            border: none;
+            border-radius: 4px;
+            color: #000;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+            font-weight: 600;
+        }
+
+        .btn-send:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(62, 186, 244, 0.4);
+        }
+
+        .btn-send:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* ==================== RIGHT PANEL - STEPS ==================== */
+        .right-panel {
+            width: 320px;
+            background: var(--bg-secondary);
+            border-left: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            transform: translateX(0);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .right-panel.hidden {
+            transform: translateX(100%);
+            box-shadow: none;
+            width: 0;
+            border: none;
+        }
+
+        .right-panel.collapsed {
+            width: 60px;
+            transform: translateX(0);
+        }
+
+        .steps-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+            background: linear-gradient(90deg, transparent, rgba(223, 48, 255, 0.05));
+            flex-shrink: 0;
+        }
+
+        .steps-title {
+            font-family: 'Rajdhani', monospace;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--purple);
+            letter-spacing: 1px;
+        }
+
+        .steps-count {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-left: 8px;
+        }
+
+        .btn-close-steps {
+            width: 28px;
+            height: 28px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            font-size: 16px;
+        }
+
+        .btn-close-steps:hover {
+            border-color: var(--purple);
+            color: var(--purple);
+        }
+
+        .steps-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .steps-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .steps-content::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
+
+        .step-card {
+            padding: 14px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            border-left: 3px solid var(--purple);
+            animation: slideIn 0.3s ease;
+        }
+
+        .step-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .step-number {
+            width: 24px;
+            height: 24px;
+            min-width: 24px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--purple), #b20dff);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 700;
+        }
+
+        .step-info {
+            flex: 1;
+        }
+
+        .step-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .step-description {
+            font-size: 10px;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        .step-status {
+            font-size: 10px;
+            color: var(--text-secondary);
+        }
+
+        .step-fields {
+            margin-top: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .step-field {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .field-label {
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--text-primary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .field-input {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 8px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 11px;
+            color: var(--text-primary);
+            transition: border-color 0.2s ease;
+        }
+
+        .field-input:focus {
+            outline: none;
+            border-color: var(--purple);
+            box-shadow: 0 0 8px rgba(223, 48, 255, 0.2);
+        }
+
+        .field-input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .step-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .btn-step {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-approve {
+            background: linear-gradient(90deg, var(--green), #00b88d);
+            color: #000;
+        }
+
+        .btn-approve:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0, 212, 155, 0.3);
+        }
+
+        .btn-decline {
+            background: transparent;
+            border: 1px solid var(--red);
+            color: var(--red);
+        }
+
+        .btn-decline:hover {
+            background: rgba(255, 71, 87, 0.1);
+        }
+
+        .step-progress {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+        }
+
+        .progress-label {
+            font-size: 9px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 6px;
+            background: var(--bg-primary);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--cyan), var(--purple));
+            transition: width 0.3s ease;
+            border-radius: 3px;
+        }
+
+        /* ==================== RESPONSIVE ==================== */
+        @media (max-width: 1200px) {
+            .left-panel {
+                width: 200px;
+            }
+
+            .right-panel {
+                width: 280px;
+            }
+
+            .message-bubble {
+                max-width: 85%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                gap: 0;
+            }
+
+            .left-panel {
+                display: none;
+                position: absolute;
+                width: 100%;
+                height: auto;
+                z-index: 10;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+            }
+
+            .left-panel.mobile-visible {
+                display: flex;
+                max-height: 200px;
+            }
+
+            .center-panel {
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+            }
+
+            .right-panel {
+                width: 100%;
+                height: auto;
+                max-height: 50vh;
+                border-left: none;
+                border-top: 1px solid var(--border);
+            }
+
+            .message-bubble {
+                max-width: 100%;
+            }
+
+            .suggestion-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ==================== UTILITIES ==================== */
+        .hidden {
+            display: none !important;
+        }
+
+        .blur {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        code {
+            background: rgba(62, 186, 244, 0.1);
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Rajdhani', monospace;
+            color: var(--cyan);
+        }
+
+        /* ==================== CONFETTI ANIMATION ==================== */
+        @keyframes confettiFall {
+            0% {
+                transform: translateY(0) rotateZ(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotateZ(720deg);
+                opacity: 0;
+            }
+        }
+
+        .confetti {
+            position: fixed;
+            pointer-events: none;
+            animation: confettiFall 3s ease-in forwards;
+        }
+    </style>
+</head>
+<body>
+    <!-- HEADER -->
+    <div class="header">
+        <div class="header-title">⬡ HiveWorkflow</div>
+        <div class="header-center">
+            <div class="mode-badge">
+                <span class="mode-dot"></span>
+                Standalone
+            </div>
+        </div>
+        <div class="header-capacity">
+            <div class="capacity-ring">
+                <div class="capacity-circle" id="capacityCircle">
+                    <span id="capacityText">8/20</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN CONTAINER -->
+    <div class="container">
+        <!-- LEFT PANEL -->
+        <div class="left-panel" id="leftPanel">
+            <!-- System Capacity -->
+            <div class="panel-section">
+                <div class="section-title">System Capacity</div>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-label">CPU Load</div>
+                        <div class="stat-value" id="cpuValue">4/8 cores</div>
+                        <div class="stat-bar">
+                            <div class="stat-bar-fill" id="cpuBar" style="width: 45%"></div>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">RAM Usage</div>
+                        <div class="stat-value" id="ramValue">6.2/16 GB</div>
+                        <div class="stat-bar">
+                            <div class="stat-bar-fill" id="ramBar" style="width: 38%"></div>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Disk Free</div>
+                        <div class="stat-value" id="diskValue">128 GB</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Permanent Agents -->
+            <div class="panel-section">
+                <div class="section-title">Active Agents (8)</div>
+                <div id="agentsList" style="display: flex; flex-direction: column; gap: 8px;">
+                    <!-- Agents will be inserted here -->
+                </div>
+            </div>
+
+            <!-- Capacity Warning -->
+            <div class="panel-section" id="capacityWarning" style="display: none; background: rgba(255, 233, 48, 0.1); border: 1px solid rgba(255, 233, 48, 0.3); border-radius: 6px;">
+                <div style="color: var(--yellow); font-size: 11px; display: flex; gap: 8px; align-items: center;">
+                    <span style="font-size: 14px;">⚠</span>
+                    <span>System running warm. Consider retiring idle agents.</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- CENTER PANEL -->
+        <div class="center-panel">
+            <div class="chat-header">
+                <div class="orion-icon">O</div>
+                <div class="chat-header-text">
+                    <div class="chat-title">Chat with Orion</div>
+                </div>
+            </div>
+
+            <!-- Chat Messages -->
+            <div class="chat-messages" id="chatMessages">
+                <!-- Messages will be inserted here -->
+            </div>
+
+            <!-- Input Area -->
+            <div class="chat-input-area">
+                <div class="input-wrapper">
+                    <textarea
+                        class="chat-textarea"
+                        id="inputTextarea"
+                        placeholder="Describe what you want built..."
+                        rows="1"
+                    ></textarea>
+                    <button class="btn-attach" id="btnAttach" title="Attach file">📎</button>
+                </div>
+                <button class="btn-send" id="btnSend" title="Send (Ctrl+Enter)">→</button>
+            </div>
+        </div>
+
+        <!-- RIGHT PANEL -->
+        <div class="right-panel hidden" id="rightPanel">
+            <div class="steps-header">
+                <div>
+                    <div class="steps-title">Your Input Needed <span class="steps-count" id="stepsCount">(0)</span></div>
+                </div>
+                <button class="btn-close-steps" id="btnCloseSteps">✕</button>
+            </div>
+
+            <div class="steps-content" id="stepsContent">
+                <!-- Step cards will be inserted here -->
+            </div>
+
+            <div class="step-progress" style="padding: 16px; border-top: 1px solid var(--border);">
+                <div class="progress-label">Progress</div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar-fill" id="stepsProgressBar" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load HiveWorkflow modules (external JS) -->
+    <script src="../lib/ws-client.js"></script>
+    <script src="../lib/hive-bus.js"></script>
+    <script src="../../hiveworkflow/engine.js"></script>
+    <script src="../../hiveworkflow/hw-monitor.js"></script>
+    <script src="../../hiveworkflow/spawner.js"></script>
+    <script>
+        // ==================== CONFIGURATION & STATE ====================
+        const STATE = {
+            isWorkflowRunning: false,
+            agents: [
+                { id: 'orion', name: 'Orion', status: 'idle', task: 'Idle' },
+                { id: 'atlas', name: 'Atlas', status: 'idle', task: 'Idle' },
+                { id: 'forge', name: 'Forge', status: 'idle', task: 'Idle' },
+                { id: 'patch', name: 'Patch', status: 'idle', task: 'Idle' },
+                { id: 'quill', name: 'Quill', status: 'idle', task: 'Idle' },
+                { id: 'cipher', name: 'Cipher', status: 'idle', task: 'Idle' },
+                { id: 'pixel', name: 'Pixel', status: 'idle', task: 'Idle' },
+                { id: 'spark', name: 'Spark', status: 'idle', task: 'Idle' },
+            ],
+            spawnedAgents: [],
+            steps: [],
+            messages: [],
+            workflowPlan: null,
+        };
+
+        // ==================== DOM REFERENCES ====================
+        const DOM = {
+            chatMessages: document.getElementById('chatMessages'),
+            inputTextarea: document.getElementById('inputTextarea'),
+            btnSend: document.getElementById('btnSend'),
+            btnAttach: document.getElementById('btnAttach'),
+            btnCloseSteps: document.getElementById('btnCloseSteps'),
+            rightPanel: document.getElementById('rightPanel'),
+            stepsContent: document.getElementById('stepsContent'),
+            stepsCount: document.getElementById('stepsCount'),
+            stepsProgressBar: document.getElementById('stepsProgressBar'),
+            agentsList: document.getElementById('agentsList'),
+            capacityCircle: document.getElementById('capacityCircle'),
+            capacityText: document.getElementById('capacityText'),
+            capacityWarning: document.getElementById('capacityWarning'),
+            cpuValue: document.getElementById('cpuValue'),
+            ramValue: document.getElementById('ramValue'),
+            cpuBar: document.getElementById('cpuBar'),
+            ramBar: document.getElementById('ramBar'),
+        };
+
+        // ==================== HIVEWORKFLOW ENGINE INTEGRATION ====================
+        let hwMonitor = null;
+        let agentSpawner = null;
+        let workflowEngine = null;
+        let hiveBus = null;
+
+        function initEngine() {
+            try {
+                // Initialize hardware monitor
+                if (typeof HiveHWMonitor !== 'undefined') {
+                    hwMonitor = new HiveHWMonitor();
+                    hwMonitor.getSystemProfile().then(profile => {
+                        if (profile) {
+                            DOM.cpuValue.textContent = profile.cpuCores + ' cores';
+                            DOM.ramValue.textContent = Math.round(profile.totalRam / 1024) + ' GB';
+                            const ramPct = Math.round(((profile.totalRam - profile.availableRam) / profile.totalRam) * 100);
+                            DOM.ramBar.style.width = ramPct + '%';
+                            DOM.capacityText.textContent = (profile.maxConcurrentAgents || 8) + '/' + 20;
+                        }
+                    }).catch(() => {});
+                }
+
+                // Initialize agent spawner
+                if (typeof HiveAgentSpawner !== 'undefined') {
+                    agentSpawner = new HiveAgentSpawner({ hwMonitor });
+                }
+
+                // Initialize workflow engine
+                if (typeof HiveWorkflowEngine !== 'undefined') {
+                    workflowEngine = new HiveWorkflowEngine({ hwMonitor, spawner: agentSpawner });
+
+                    // Wire engine events to UI updates
+                    workflowEngine.onEvent((event, data) => {
+                        switch(event) {
+                            case 'workflow-log':
+                                if (data.entry) addAgentLogMessage(data.entry.agentName, data.entry.message, data.entry.agentColor);
+                                break;
+                            case 'task-started':
+                                updateAgentStatus(data.task.agentIds, 'working', data.task.title);
+                                break;
+                            case 'task-completed':
+                                updateAgentStatus(data.task.agentIds, 'idle', 'Idle');
+                                break;
+                            case 'workflow-completed':
+                                STATE.isWorkflowRunning = false;
+                                DOM.inputTextarea.disabled = false;
+                                DOM.btnSend.disabled = false;
+                                addOrionMessage('✅ Workflow complete! All tasks finished successfully.');
+                                showConfetti();
+                                break;
+                            case 'human-step-needed':
+                                showStepsPanel(data.step);
+                                break;
+                            case 'agent-spawned':
+                                STATE.spawnedAgents.push(data.agent);
+                                renderAgentsList();
+                                break;
+                        }
+                    });
+                }
+
+                // Initialize cross-screen event bus
+                if (typeof HiveBus !== 'undefined') {
+                    hiveBus = new HiveBus();
+                    if (workflowEngine) hiveBus.connectEngine(workflowEngine);
+                }
+
+                console.log('[HiveWorkflow] Engine initialized. Mode:', workflowEngine ? 'full' : 'standalone');
+            } catch (e) {
+                console.warn('[HiveWorkflow] Engine init error (running standalone):', e.message);
+            }
+        }
+
+        function updateAgentStatus(agentIds, status, task) {
+            if (!agentIds) return;
+            for (const id of agentIds) {
+                const agent = STATE.agents.find(a => a.id === id);
+                if (agent) { agent.status = status; agent.task = task || 'Idle'; }
+            }
+            renderAgentsList();
+        }
+
+        function addAgentLogMessage(agentName, message, color) {
+            const el = document.createElement('div');
+            el.className = 'message agent-log';
+            el.innerHTML = `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${color || '#888'};margin-right:6px;"></span><strong style="color:${color || '#888'}">${agentName}</strong>: ${message}`;
+            el.style.cssText = 'font-size:12px;color:#a0a0a0;padding:4px 16px;opacity:0;animation:fadeIn 0.3s forwards;';
+            DOM.chatMessages.appendChild(el);
+            DOM.chatMessages.scrollTop = DOM.chatMessages.scrollHeight;
+        }
+
+        function showConfetti() {
+            // Simple confetti burst
+            for (let i = 0; i < 30; i++) {
+                const particle = document.createElement('div');
+                const colors = ['#3ebaf4', '#df30ff', '#ffe930', '#00d49b', '#ff6b35'];
+                particle.style.cssText = `position:fixed;width:8px;height:8px;background:${colors[i % colors.length]};border-radius:50%;pointer-events:none;z-index:10000;left:50%;top:50%;`;
+                document.body.appendChild(particle);
+                const angle = (Math.PI * 2 * i) / 30;
+                const velocity = 200 + Math.random() * 300;
+                const dx = Math.cos(angle) * velocity;
+                const dy = Math.sin(angle) * velocity - 200;
+                particle.animate([
+                    { transform: 'translate(0,0) scale(1)', opacity: 1 },
+                    { transform: `translate(${dx}px, ${dy + 400}px) scale(0)`, opacity: 0 }
+                ], { duration: 1500, easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)' }).onfinish = () => particle.remove();
+            }
+        }
+
+        // ==================== INITIALIZATION ====================
+        function init() {
+            renderAgentsList();
+            loadWelcomeState();
+            setupEventListeners();
+            updateSystemStats();
+            setInterval(updateSystemStats, 2000);
+            initEngine();
+        }
+
+        function loadWelcomeState() {
+            DOM.chatMessages.innerHTML = `
+                <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
+                    <div class="welcome-state">
+                        <div class="welcome-avatar">O</div>
+                        <div class="welcome-heading">What would you like to build?</div>
+                        <div class="suggestion-grid">
+                            <div class="suggestion-card" onclick="sendMessage('Build a landing page')">
+                                <div class="suggestion-icon">🌐</div>
+                                <div class="suggestion-title">Landing Page</div>
+                                <div class="suggestion-subtitle">Modern & responsive</div>
+                            </div>
+                            <div class="suggestion-card" onclick="sendMessage('Set up an automation pipeline')">
+                                <div class="suggestion-icon">⚙️</div>
+                                <div class="suggestion-title">Automation</div>
+                                <div class="suggestion-subtitle">Workflow automation</div>
+                            </div>
+                            <div class="suggestion-card" onclick="sendMessage('Research competitors')">
+                                <div class="suggestion-icon">🔍</div>
+                                <div class="suggestion-title">Research</div>
+                                <div class="suggestion-subtitle">Competitive analysis</div>
+                            </div>
+                            <div class="suggestion-card" onclick="sendMessage('Write a content strategy')">
+                                <div class="suggestion-icon">📝</div>
+                                <div class="suggestion-title">Content</div>
+                                <div class="suggestion-subtitle">Strategy planning</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderAgentsList() {
+            DOM.agentsList.innerHTML = STATE.agents
+                .map(agent => `
+                    <div class="agent-card">
+                        <div class="agent-status-dot ${agent.status}" id="dot-${agent.id}"></div>
+                        <div class="agent-info">
+                            <div class="agent-name">${agent.name}</div>
+                            <div class="agent-task">${agent.task}</div>
+                        </div>
+                    </div>
+                `)
+                .join('');
+        }
+
+        function setupEventListeners() {
+            DOM.inputTextarea.addEventListener('keydown', (e) => {
+                if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+
+            DOM.btnSend.addEventListener('click', sendMessage);
+            DOM.btnAttach.addEventListener('click', () => alert('File attachment feature coming soon!'));
+            DOM.btnCloseSteps.addEventListener('click', closeStepsPanel);
+
+            // Auto-grow textarea
+            DOM.inputTextarea.addEventListener('input', () => {
+                DOM.inputTextarea.style.height = 'auto';
+                DOM.inputTextarea.style.height = Math.min(DOM.inputTextarea.scrollHeight, 100) + 'px';
+            });
+        }
+
+        // ==================== CHAT FUNCTIONS ====================
+        function sendMessage(text) {
+            const message = text || DOM.inputTextarea.value.trim();
+            if (!message) return;
+
+            addMessage('user', message);
+            DOM.inputTextarea.value = '';
+            DOM.inputTextarea.style.height = 'auto';
+
+            // Simulate Orion response
+            showTypingIndicator();
+            setTimeout(() => {
+                removeTypingIndicator();
+                addMessage('orion', `I'll help you with: "${message}"\n\nDecomposing this into actionable tasks...`);
+                setTimeout(() => showWorkflowPlan(message), 800);
+            }, 2000);
+        }
+
+        function addMessage(type, content, isLog = false) {
+            if (isLog) {
+                const html = `
+                    <div class="message orion">
+                        <div class="agent-log">
+                            <div class="agent-log-dot" style="background: ${getRandomColor()};"></div>
+                            <div>${content}</div>
+                        </div>
+                    </div>
+                `;
+                DOM.chatMessages.insertAdjacentHTML('beforeend', html);
+            } else {
+                const bubble = `
+                    <div class="message ${type}">
+                        ${type === 'orion' ? '<div class="orion-avatar">O</div>' : ''}
+                        <div class="message-bubble">
+                            ${type === 'orion' ? '<div class="message-content">' : ''}
+                            ${content.replace(/\n/g, '<br>')}
+                            ${type === 'orion' ? '</div>' : ''}
+                        </div>
+                    </div>
+                `;
+                DOM.chatMessages.insertAdjacentHTML('beforeend', bubble);
+            }
+            STATE.messages.push({ type, content });
+            scrollToBottom();
+        }
+
+        function showTypingIndicator() {
+            const html = `
+                <div class="message orion" id="typingIndicator">
+                    <div class="orion-avatar">O</div>
+                    <div class="typing-indicator">
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                    </div>
+                </div>
+            `;
+            DOM.chatMessages.insertAdjacentHTML('beforeend', html);
+            scrollToBottom();
+        }
+
+        function removeTypingIndicator() {
+            const indicator = document.getElementById('typingIndicator');
+            if (indicator) indicator.remove();
+        }
+
+        function scrollToBottom() {
+            DOM.chatMessages.scrollTop = DOM.chatMessages.scrollHeight;
+        }
+
+        function showWorkflowPlan(task) {
+            const plan = {
+                tasks: [
+                    { num: 1, title: `Research: ${task}`, agent: 'Spark', status: 'pending' },
+                    { num: 2, title: `Design: ${task}`, agent: 'Pixel', status: 'pending' },
+                    { num: 3, title: `Build: ${task}`, agent: 'Forge, Pixel', status: 'pending' },
+                    { num: 4, title: `Content: ${task}`, agent: 'Quill', status: 'pending' },
+                    { num: 5, title: `Security Review`, agent: 'Cipher', status: 'pending' },
+                    { num: 6, title: `Deploy & Configure`, agent: 'Atlas', status: 'pending' },
+                    { num: 7, title: `Verification & Delivery`, agent: 'Orion', status: 'pending' },
+                ],
+                parallel: 3,
+                duration: '~4 minutes',
+            };
+
+            STATE.workflowPlan = plan;
+
+            const tasksHTML = plan.tasks
+                .map(t => `
+                    <div class="task-row" id="task-${t.num}">
+                        <div class="task-number">${t.num}</div>
+                        <div class="task-title">${t.title}</div>
+                        <div class="task-status" id="status-${t.num}">○</div>
+                        <div class="task-agents">
+                            ${t.agent.split(',').map(a => `<div class="agent-badge-small">${a.trim().charAt(0).toUpperCase()}</div>`).join('')}
+                        </div>
+                    </div>
+                `)
+                .join('');
+
+            const planHTML = `
+                <div class="message orion" style="width: 100%;">
+                    <div class="orion-avatar">O</div>
+                    <div class="message-content">
+                        <div class="workflow-plan">
+                            <div class="workflow-plan-title">📊 Workflow Plan</div>
+                            <div class="workflow-tasks">${tasksHTML}</div>
+                            <div class="workflow-stats">
+                                <div class="workflow-stat">⚡ ${plan.parallel} parallel</div>
+                                <div class="workflow-stat">⏱ ${plan.duration}</div>
+                                <div class="workflow-stat">🖥 8/20 available</div>
+                            </div>
+                            <div class="workflow-buttons">
+                                <button class="btn-workflow btn-start" onclick="startWorkflow()">▶ Start Workflow</button>
+                                <button class="btn-workflow btn-edit" disabled title="Coming soon">✏ Edit</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            DOM.chatMessages.insertAdjacentHTML('beforeend', planHTML);
+            scrollToBottom();
+        }
+
+        function startWorkflow() {
+            STATE.isWorkflowRunning = true;
+            DOM.inputTextarea.disabled = true;
+            DOM.btnSend.disabled = true;
+
+            // Simulate workflow execution
+            const tasks = STATE.workflowPlan.tasks;
+            tasks.forEach((task, idx) => {
+                setTimeout(() => {
+                    updateTaskStatus(task.num, 'running');
+                }, idx * 800);
+
+                setTimeout(() => {
+                    updateTaskStatus(task.num, 'done');
+                    addMessage('orion', `✓ Completed: ${task.title}`, true);
+                }, idx * 800 + 3000);
+            });
+
+            // Completion
+            setTimeout(() => {
+                STATE.isWorkflowRunning = false;
+                DOM.inputTextarea.disabled = false;
+                DOM.btnSend.disabled = false;
+                addMessage('orion', '🎉 Workflow completed successfully!');
+                triggerConfetti();
+            }, tasks.length * 800 + 3500);
+        }
+
+        function updateTaskStatus(taskNum, status) {
+            const row = document.getElementById(`task-${taskNum}`);
+            const statusEl = document.getElementById(`status-${taskNum}`);
+            if (row && statusEl) {
+                row.classList.add(`status-${status}`);
+                statusEl.className = `task-status ${status}`;
+                statusEl.textContent = status === 'running' ? '⟳' : status === 'done' ? '✓' : '○';
+            }
+        }
+
+        function triggerConfetti() {
+            for (let i = 0; i < 30; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + '%';
+                confetti.style.background = ['#3ebaf4', '#df30ff', '#ffe930', '#00d49b'][Math.floor(Math.random() * 4)];
+                confetti.style.width = Math.random() * 8 + 4 + 'px';
+                confetti.style.height = Math.random() * 8 + 4 + 'px';
+                confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+                confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                document.body.appendChild(confetti);
+                setTimeout(() => confetti.remove(), 4000);
+            }
+        }
+
+        // ==================== STEPS PANEL ====================
+        function showStepsPanel() {
+            DOM.rightPanel.classList.remove('hidden');
+        }
+
+        function closeStepsPanel() {
+            DOM.rightPanel.classList.add('hidden');
+        }
+
+        // ==================== SYSTEM STATS ====================
+        function updateSystemStats() {
+            const cpuUsage = Math.floor(Math.random() * 80 + 20);
+            const ramUsage = Math.random() * 10 + 2;
+            const agentsActive = STATE.agents.filter(a => a.status === 'working').length + STATE.spawnedAgents.length;
+
+            DOM.cpuValue.textContent = `${Math.ceil(cpuUsage / 10)}/8 cores`;
+            DOM.ramValue.textContent = `${ramUsage.toFixed(1)}/16 GB`;
+            DOM.cpuBar.style.width = cpuUsage + '%';
+            DOM.ramBar.style.width = (ramUsage / 16) * 100 + '%';
+
+            DOM.capacityText.textContent = `${agentsActive + 2}/20`;
+            DOM.capacityCircle.className = 'capacity-circle';
+            if (cpuUsage > 70) {
+                DOM.capacityCircle.classList.add('hot');
+                DOM.capacityWarning.style.display = 'block';
+            } else if (cpuUsage > 50) {
+                DOM.capacityCircle.classList.add('warm');
+            }
+
+            // Simulate occasional agent activity
+            if (Math.random() > 0.9 && !STATE.isWorkflowRunning) {
+                const randomAgent = STATE.agents[Math.floor(Math.random() * STATE.agents.length)];
+                if (randomAgent.status !== 'working') {
+                    randomAgent.status = Math.random() > 0.6 ? 'working' : 'idle';
+                    randomAgent.task = randomAgent.status === 'working' ? 'Processing...' : 'Idle';
+                    renderAgentsList();
+                }
+            }
+        }
+
+        function getRandomColor() {
+            const colors = ['var(--cyan)', 'var(--purple)', 'var(--green)', 'var(--yellow)'];
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+
+        // ==================== START ====================
+        init();
+
+        // ── Gateway Event Bridge (receives events from parent HiveControl shell) ──
+        window.addEventListener('message', (event) => {
+            try {
+                if (event.data && event.data.type === 'hiveEvent') {
+                    const { event: evt, payload } = event.data;
+                    handleGatewayEvent(evt, payload);
+                }
+            } catch (_) {}
+        });
+
+        function handleGatewayEvent(event, payload) {
+            switch (event) {
+                case 'heartbeat':
+                    // Update any live status indicators
+                    break;
+                case 'agent':
+                    // Agent status change
+                    break;
+                case 'health':
+                    // Gateway health update
+                    break;
+                default:
+                    break;
+            }
+        }
+    </script>
+</body>
+</html>
