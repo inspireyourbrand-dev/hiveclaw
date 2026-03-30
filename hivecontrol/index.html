@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HiveControl OS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-dark: #0a0a0a;
+            --bg-card: #1a1a1a;
+            --primary-cyan: #3ebaf4;
+            --accent-purple: #df30ff;
+            --attention-yellow: #ffe930;
+            --success-green: #00d49b;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --border-color: #2a2a2a;
+            --glow-cyan: 0 0 20px rgba(62, 186, 244, 0.3);
+            --glow-purple: 0 0 20px rgba(223, 48, 255, 0.3);
+            --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            font-family: 'Poppins', sans-serif;
+            overflow: hidden;
+        }
+
+        /* Connection Banner */
+        .connection-banner {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: linear-gradient(90deg, #ff3333, #ff5555);
+            color: white;
+            padding: 12px 20px;
+            text-align: center;
+            font-weight: 600;
+            font-family: 'Rajdhani', monospace;
+            animation: pulse-banner 1.5s ease-in-out infinite;
+            box-shadow: 0 0 20px rgba(255, 51, 51, 0.5);
+        }
+
+        .connection-banner.visible {
+            display: block;
+        }
+
+        .connection-banner.reconnecting {
+            background: linear-gradient(90deg, #ffe930, #ffed5e);
+            color: #0a0a0a;
+            animation: pulse-banner 1s ease-in-out infinite;
+        }
+
+        @keyframes pulse-banner {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        /* Main Container */
+        .app-container {
+            display: flex;
+            height: 100%;
+            flex-direction: row;
+            padding-top: 0;
+        }
+
+        .app-container.banner-visible {
+            padding-top: 48px;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background-color: var(--bg-card);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            transition: var(--transition-smooth);
+            box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: var(--bg-dark);
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 3px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background: var(--text-secondary);
+        }
+
+        /* Sidebar Header */
+        .sidebar-header {
+            padding: 24px 16px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-family: 'Rajdhani', monospace;
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .sidebar-header-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--primary-cyan), var(--accent-purple));
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            box-shadow: var(--glow-cyan);
+        }
+
+        .sidebar-header-icon svg {
+            width: 20px;
+            height: 20px;
+            stroke: var(--text-primary);
+            stroke-width: 2;
+            fill: none;
+        }
+
+        .sidebar-header-text {
+            background: linear-gradient(135deg, var(--primary-cyan), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .sidebar-header-text > div:first-child {
+            font-size: 14px;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-header-text > div:last-child {
+            font-size: 10px;
+            opacity: 0.7;
+            letter-spacing: 0.5px;
+        }
+
+        /* Mobile Hamburger */
+        .hamburger-toggle {
+            display: none;
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            z-index: 1001;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            cursor: pointer;
+            padding: 8px;
+            flex-direction: column;
+            gap: 4px;
+            transition: var(--transition-smooth);
+        }
+
+        .hamburger-toggle:hover {
+            background: var(--border-color);
+        }
+
+        .hamburger-toggle span {
+            width: 20px;
+            height: 2px;
+            background: var(--primary-cyan);
+            border-radius: 1px;
+            transition: var(--transition-smooth);
+        }
+
+        /* Sidebar Navigation */
+        .sidebar-nav {
+            flex: 1;
+            padding: 16px 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            overflow-y: auto;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            border-left: 3px solid transparent;
+            position: relative;
+            user-select: none;
+        }
+
+        .nav-item:hover {
+            background: var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .nav-item.active {
+            background: rgba(62, 186, 244, 0.1);
+            color: var(--primary-cyan);
+            border-left-color: var(--primary-cyan);
+            box-shadow: inset 0 0 15px rgba(62, 186, 244, 0.1);
+        }
+
+        .nav-item.coming-soon {
+            opacity: 0.6;
+            cursor: not-allowed;
+            color: var(--text-secondary);
+        }
+
+        .nav-item.coming-soon:hover {
+            background: transparent;
+            color: var(--text-secondary);
+        }
+
+        .nav-item svg {
+            width: 18px;
+            height: 18px;
+            stroke: currentColor;
+            stroke-width: 2;
+            fill: none;
+            flex-shrink: 0;
+            transition: var(--transition-smooth);
+        }
+
+        .nav-item.active svg {
+            filter: drop-shadow(0 0 8px var(--primary-cyan));
+        }
+
+        .nav-item-label {
+            flex: 1;
+        }
+
+        .nav-item-badge {
+            background: var(--accent-purple);
+            color: var(--bg-dark);
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 2px;
+            font-weight: 600;
+            font-family: 'Rajdhani', monospace;
+            letter-spacing: 0.5px;
+        }
+
+        /* Sidebar Footer */
+        .sidebar-footer {
+            padding: 16px;
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+            font-size: 11px;
+            color: var(--text-secondary);
+            font-family: 'Rajdhani', monospace;
+            letter-spacing: 0.5px;
+        }
+
+        .sidebar-footer-brand {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            margin-bottom: 4px;
+            color: var(--primary-cyan);
+        }
+
+        .sidebar-footer-brand svg {
+            width: 12px;
+            height: 12px;
+            fill: var(--primary-cyan);
+        }
+
+        .sidebar-footer-version {
+            opacity: 0.7;
+        }
+
+        /* Main Content Area */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--bg-dark);
+            overflow: hidden;
+        }
+
+        /* Top Bar */
+        .topbar {
+            height: 56px;
+            background-color: var(--bg-card);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            padding: 0 24px;
+            gap: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex: 1;
+        }
+
+        .connection-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background: rgba(0, 212, 155, 0.1);
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            font-family: 'Rajdhani', monospace;
+            color: var(--success-green);
+        }
+
+        .connection-indicator.disconnected {
+            background: rgba(255, 51, 51, 0.1);
+            color: #ff3333;
+        }
+
+        .connection-indicator.reconnecting {
+            background: rgba(255, 233, 48, 0.1);
+            color: var(--attention-yellow);
+            animation: pulse-indicator 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse-indicator {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .connection-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success-green);
+            box-shadow: 0 0 8px var(--success-green);
+            animation: pulse-dot 2s ease-in-out infinite;
+        }
+
+        .connection-indicator.disconnected .connection-dot {
+            background: #ff3333;
+            box-shadow: 0 0 8px #ff3333;
+            animation: none;
+        }
+
+        .connection-indicator.reconnecting .connection-dot {
+            background: var(--attention-yellow);
+            box-shadow: 0 0 8px var(--attention-yellow);
+            animation: pulse-dot 1s ease-in-out infinite;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+        }
+
+        .search-bar {
+            display: flex;
+            align-items: center;
+            background: var(--bg-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 8px 12px;
+            gap: 8px;
+            max-width: 300px;
+            flex: 1;
+        }
+
+        .search-bar input {
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-family: 'Poppins', sans-serif;
+            font-size: 13px;
+            outline: none;
+            flex: 1;
+        }
+
+        .search-bar input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .search-bar svg {
+            width: 16px;
+            height: 16px;
+            stroke: var(--text-secondary);
+            stroke-width: 2;
+            fill: none;
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .current-time {
+            font-family: 'Rajdhani', monospace;
+            font-size: 13px;
+            color: var(--primary-cyan);
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        /* Screen Container */
+        .screen-container {
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .screen-frame {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background-color: var(--bg-dark);
+            display: none;
+        }
+
+        .screen-frame.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 240px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hamburger-toggle {
+                display: flex;
+            }
+
+            .sidebar {
+                position: fixed;
+                left: 0;
+                top: 0;
+                height: 100%;
+                width: 240px;
+                z-index: 999;
+                transform: translateX(-100%);
+                transition: var(--transition-smooth);
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .app-container {
+                flex-direction: column;
+            }
+
+            .main-content {
+                width: 100%;
+            }
+
+            .search-bar {
+                max-width: none;
+            }
+
+            .topbar {
+                padding: 0 16px;
+                gap: 12px;
+            }
+
+            .topbar-left {
+                gap: 12px;
+            }
+
+            .topbar-right {
+                gap: 12px;
+            }
+
+            .current-time {
+                font-size: 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .connection-indicator {
+                font-size: 11px;
+                padding: 4px 8px;
+            }
+
+            .current-time {
+                display: none;
+            }
+
+            .topbar {
+                height: 48px;
+                padding: 0 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Connection Banner -->
+    <div class="connection-banner" id="connectionBanner"></div>
+
+    <!-- App Container -->
+    <div class="app-container" id="appContainer">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <!-- Sidebar Header -->
+            <div class="sidebar-header">
+                <div class="sidebar-header-icon">
+                    <svg viewBox="0 0 24 24">
+                        <polygon points="12,2 22,7 22,17 12,22 2,17 2,7"></polygon>
+                    </svg>
+                </div>
+                <div class="sidebar-header-text">
+                    <div>HIVECONTROL</div>
+                    <div>OS</div>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <nav class="sidebar-nav" id="sidebarNav">
+                <div class="nav-item active" data-screen="dashboard">
+                    <svg viewBox="0 0 24 24">
+                        <rect x="3" y="3" width="8" height="8"></rect>
+                        <rect x="13" y="3" width="8" height="8"></rect>
+                        <rect x="3" y="13" width="8" height="8"></rect>
+                        <rect x="13" y="13" width="8" height="8"></rect>
+                    </svg>
+                    <span class="nav-item-label">Dashboard</span>
+                </div>
+                <div class="nav-item" data-screen="tasks">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M3 4h18v2H3V4zm0 7h18v2H3v-2zm0 7h18v2H3v-2z"></path>
+                    </svg>
+                    <span class="nav-item-label">Tasks</span>
+                </div>
+                <div class="nav-item" data-screen="calendar">
+                    <svg viewBox="0 0 24 24">
+                        <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+                        <path d="M3 10h18"></path>
+                        <path d="M7 1v6M17 1v6"></path>
+                    </svg>
+                    <span class="nav-item-label">Calendar</span>
+                </div>
+                <div class="nav-item" data-screen="memory">
+                    <svg viewBox="0 0 24 24">
+                        <rect x="4" y="4" width="16" height="16" rx="2"></rect>
+                        <path d="M7 8h10M7 12h10M7 16h6"></path>
+                    </svg>
+                    <span class="nav-item-label">Memory</span>
+                </div>
+                <div class="nav-item" data-screen="projects">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                    </svg>
+                    <span class="nav-item-label">Projects</span>
+                </div>
+                <div class="nav-item" data-screen="documents">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
+                        <polyline points="13 2 13 9 20 9"></polyline>
+                    </svg>
+                    <span class="nav-item-label">Documents</span>
+                </div>
+                <div class="nav-item" data-screen="team">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+                    <span class="nav-item-label">Team</span>
+                </div>
+                <div class="nav-item" data-screen="office">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                        <line x1="9" y1="12" x2="9" y2="4"></line>
+                    </svg>
+                    <span class="nav-item-label">Office</span>
+                </div>
+                <div class="nav-item" data-screen="workflow">
+                    <svg viewBox="0 0 24 24">
+                        <circle cx="12" cy="5" r="2"></circle>
+                        <circle cx="5" cy="19" r="2"></circle>
+                        <circle cx="19" cy="19" r="2"></circle>
+                        <line x1="12" y1="7" x2="5" y2="17"></line>
+                        <line x1="12" y1="7" x2="19" y2="17"></line>
+                    </svg>
+                    <span class="nav-item-label">HiveWorkflow</span>
+                </div>
+            </nav>
+
+            <!-- Sidebar Footer -->
+            <div class="sidebar-footer">
+                <div class="sidebar-footer-brand">
+                    <svg viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="2"></circle>
+                        <circle cx="19" cy="12" r="2"></circle>
+                        <circle cx="5" cy="12" r="2"></circle>
+                    </svg>
+                    Powered by HivePowered.Ai
+                </div>
+                <div class="sidebar-footer-version">v0.1.0</div>
+            </div>
+        </aside>
+
+        <!-- Hamburger Toggle (Mobile) -->
+        <button class="hamburger-toggle" id="hamburgerToggle" aria-label="Toggle navigation">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Top Bar -->
+            <div class="topbar">
+                <div class="topbar-left">
+                    <div class="connection-indicator" id="connectionIndicator">
+                        <div class="connection-dot"></div>
+                        <span id="connectionStatus">Connected</span>
+                    </div>
+                    <div class="search-bar">
+                        <svg viewBox="0 0 24 24">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <path d="m21 21-4.35-4.35"></path>
+                        </svg>
+                        <input type="text" placeholder="Search..." id="searchInput">
+                    </div>
+                </div>
+                <div class="topbar-right">
+                    <div class="current-time" id="currentTime">00:00</div>
+                </div>
+            </div>
+
+            <!-- Screen Container -->
+            <div class="screen-container" id="screenContainer">
+                <iframe id="screenFrame" class="screen-frame active" src="screens/dashboard.html"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <script src="lib/ws-client.js"></script>
+    <script>
+        // State Management
+        const state = {
+            currentScreen: 'dashboard',
+            connected: true,
+            reconnecting: false,
+            sidebarOpen: window.innerWidth > 768
+        };
+
+        // DOM Elements
+        const sidebarElement = document.getElementById('sidebar');
+        const hamburgerToggle = document.getElementById('hamburgerToggle');
+        const sidebarNav = document.getElementById('sidebarNav');
+        const screenFrame = document.getElementById('screenFrame');
+        const connectionIndicator = document.getElementById('connectionIndicator');
+        const connectionStatus = document.getElementById('connectionStatus');
+        const connectionBanner = document.getElementById('connectionBanner');
+        const appContainer = document.getElementById('appContainer');
+        const currentTimeEl = document.getElementById('currentTime');
+        const searchInput = document.getElementById('searchInput');
+
+        // Initialize
+        function init() {
+            setupNavigation();
+            setupMobileMenu();
+            setupTime();
+            setupSearch();
+            setupWebSocket();
+            loadScreen('dashboard');
+        }
+
+        // Navigation Setup
+        function setupNavigation() {
+            const navItems = sidebarNav.querySelectorAll('.nav-item:not(.coming-soon)');
+            navItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    const screen = item.dataset.screen;
+                    loadScreen(screen);
+                    setActiveNav(item);
+                    if (window.innerWidth <= 768) {
+                        closeSidebar();
+                    }
+                });
+            });
+        }
+
+        function setActiveNav(activeItem) {
+            sidebarNav.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            activeItem.classList.add('active');
+        }
+
+        // Screen Loading
+        function loadScreen(screenName) {
+            state.currentScreen = screenName;
+            const screenPath = `screens/${screenName}.html`;
+            screenFrame.src = screenPath;
+
+            // Update active nav item
+            const navItem = sidebarNav.querySelector(`[data-screen="${screenName}"]`);
+            if (navItem) {
+                setActiveNav(navItem);
+            }
+        }
+
+        // Mobile Menu
+        function setupMobileMenu() {
+            hamburgerToggle.addEventListener('click', () => {
+                if (state.sidebarOpen) {
+                    closeSidebar();
+                } else {
+                    openSidebar();
+                }
+            });
+
+            // Close sidebar when clicking outside
+            document.addEventListener('click', (e) => {
+                if (window.innerWidth <= 768 &&
+                    !sidebarElement.contains(e.target) &&
+                    !hamburgerToggle.contains(e.target) &&
+                    state.sidebarOpen) {
+                    closeSidebar();
+                }
+            });
+        }
+
+        function openSidebar() {
+            sidebarElement.classList.add('open');
+            state.sidebarOpen = true;
+        }
+
+        function closeSidebar() {
+            sidebarElement.classList.remove('open');
+            state.sidebarOpen = false;
+        }
+
+        // Time Update
+        function setupTime() {
+            function updateTime() {
+                const now = new Date();
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                currentTimeEl.textContent = `${hours}:${minutes}`;
+            }
+            updateTime();
+            setInterval(updateTime, 1000);
+        }
+
+        // Search
+        function setupSearch() {
+            searchInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    const query = searchInput.value.trim();
+                    if (query) {
+                        // Dispatch custom event that screens can listen to
+                        window.dispatchEvent(new CustomEvent('hiveSearch', { detail: { query } }));
+                    }
+                }
+            });
+        }
+
+        // WebSocket Management
+        let wsClient = null;
+
+        function setupWebSocket() {
+            try {
+                if (typeof HiveWSClient !== 'undefined') {
+                    // Read config from localStorage or use defaults
+                    const savedHost = localStorage.getItem('hivecontrol_ws_host') || '127.0.0.1';
+                    const savedPort = localStorage.getItem('hivecontrol_ws_port') || '18789';
+                    const savedToken = localStorage.getItem('hivecontrol_ws_token') || '';
+
+                    wsClient = new HiveWSClient({
+                        host: savedHost,
+                        port: parseInt(savedPort),
+                        token: savedToken,
+                        autoReconnect: true
+                    });
+
+                    // Expose to child iframes (screens)
+                    window.hiveWS = wsClient;
+                    if (typeof HiveStore !== 'undefined') {
+                        window.hiveStore = new HiveStore();
+                    }
+
+                    // Connection status listener
+                    wsClient.on('connectionChange', (e) => {
+                        const { connected, reconnecting } = e.detail || e;
+                        updateConnectionStatus(connected, reconnecting);
+                    });
+
+                    // Forward gateway events to screens via postMessage
+                    ['health', 'agent', 'heartbeat', 'presence', 'cron', 'chat'].forEach(evt => {
+                        wsClient.on(evt, (data) => {
+                            try {
+                                screenFrame.contentWindow.postMessage({
+                                    type: 'hiveEvent',
+                                    event: evt,
+                                    payload: data
+                                }, '*');
+                            } catch (_) { /* iframe may not be ready */ }
+                        });
+                    });
+
+                    wsClient.connect();
+                    console.log('[HiveControl] WebSocket client initialized');
+                }
+            } catch (err) {
+                console.warn('[HiveControl] WebSocket setup failed, running in offline mode:', err.message);
+                updateConnectionStatus(false, false);
+            }
+        }
+
+        function updateConnectionStatus(connected, reconnecting) {
+            state.connected = connected;
+            state.reconnecting = reconnecting;
+
+            if (reconnecting) {
+                connectionIndicator.classList.remove('disconnected');
+                connectionIndicator.classList.add('reconnecting');
+                connectionStatus.textContent = 'Reconnecting...';
+                connectionBanner.textContent = 'Gateway Connection Lost - Attempting to Reconnect...';
+                connectionBanner.classList.add('visible', 'reconnecting');
+                appContainer.classList.add('banner-visible');
+            } else if (connected) {
+                connectionIndicator.classList.remove('disconnected', 'reconnecting');
+                connectionStatus.textContent = 'Connected';
+                connectionBanner.classList.remove('visible', 'reconnecting');
+                appContainer.classList.remove('banner-visible');
+            } else {
+                connectionIndicator.classList.add('disconnected');
+                connectionIndicator.classList.remove('reconnecting');
+                connectionStatus.textContent = 'Disconnected';
+                connectionBanner.textContent = 'Gateway Connection Lost - Check your connection or contact support';
+                connectionBanner.classList.add('visible');
+                appContainer.classList.add('banner-visible');
+            }
+        }
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 768) {
+                openSidebar();
+            }
+        });
+
+        // Start the app
+        init();
+    </script>
+</body>
+</html>
