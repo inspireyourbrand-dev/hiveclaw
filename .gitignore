@@ -1,0 +1,50 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# OpenClaw upstream (pulled at install)
+upstream/
+
+# Build artifacts
+dist/
+build/
+*.tgz
+
+# Environment & secrets
+.env
+.env.local
+.env.*.local
+credentials.json
+*.key
+*.pem
+
+# Memory database (local)
+data/
+*.db
+*.db-wal
+*.db-shm
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Docker volumes
+docker-data/
+
+# Upload utilities (not part of the project)
+upload-to-github.ps1
+_upload_data.json
+GITHUB-UPLOAD-GUIDE.md
