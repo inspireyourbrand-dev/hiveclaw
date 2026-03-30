@@ -1,0 +1,1218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory - HiveControl OS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #1a1a1a;
+            --cyan: #3ebaf4;
+            --purple: #df30ff;
+            --yellow: #ffe930;
+            --green: #00d49b;
+            --text-primary: #ffffff;
+            --text-secondary: #aaaaaa;
+            --border-color: #2a2a2a;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+            flex-direction: row;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background-color: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+            overflow-y: auto;
+            padding: 20px;
+            flex-shrink: 0;
+        }
+
+        .sidebar-section {
+            margin-bottom: 30px;
+        }
+
+        .sidebar-title {
+            font-family: 'Rajdhani', monospace;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--cyan);
+            margin-bottom: 12px;
+            letter-spacing: 1px;
+        }
+
+        .preset-btn {
+            display: block;
+            width: 100%;
+            padding: 10px 12px;
+            margin-bottom: 8px;
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.2s ease;
+        }
+
+        .preset-btn:hover {
+            background-color: var(--bg-primary);
+            border-color: var(--cyan);
+            color: var(--cyan);
+        }
+
+        .preset-btn.active {
+            background-color: var(--cyan);
+            border-color: var(--cyan);
+            color: var(--bg-primary);
+        }
+
+        .filter-group {
+            margin-bottom: 16px;
+        }
+
+        .filter-option {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+
+        .filter-option input[type="checkbox"] {
+            margin-right: 10px;
+            cursor: pointer;
+            accent-color: var(--cyan);
+        }
+
+        .filter-option label {
+            font-size: 13px;
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .date-range {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .date-input {
+            padding: 8px;
+            background-color: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-size: 12px;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .date-input:focus {
+            outline: none;
+            border-color: var(--cyan);
+        }
+
+        .save-filter-btn {
+            padding: 8px 12px;
+            background-color: var(--purple);
+            border: none;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            margin-top: 8px;
+        }
+
+        .save-filter-btn:hover {
+            background-color: #ff4dff;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Header */
+        .header {
+            background-color: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 20px;
+            flex-shrink: 0;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .header-title {
+            font-family: 'Rajdhani', monospace;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .view-toggle {
+            display: flex;
+            gap: 8px;
+        }
+
+        .toggle-btn {
+            padding: 8px 12px;
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.2s ease;
+        }
+
+        .toggle-btn.active {
+            background-color: var(--cyan);
+            border-color: var(--cyan);
+            color: var(--bg-primary);
+        }
+
+        .toggle-btn:hover {
+            border-color: var(--cyan);
+            color: var(--cyan);
+        }
+
+        /* Stats Bar */
+        .stats-bar {
+            display: flex;
+            gap: 16px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .stat-value {
+            font-family: 'Rajdhani', monospace;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--cyan);
+        }
+
+        /* Search Bar */
+        .search-container {
+            display: flex;
+            gap: 8px;
+            margin-top: 0;
+        }
+
+        .search-bar {
+            flex: 1;
+            padding: 12px 16px;
+            background-color: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-size: 13px;
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.2s ease;
+        }
+
+        .search-bar::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .search-bar:focus {
+            outline: none;
+            border-color: var(--cyan);
+            box-shadow: 0 0 8px rgba(62, 186, 244, 0.2);
+        }
+
+        .search-hint {
+            position: absolute;
+            right: 24px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 11px;
+            color: var(--text-secondary);
+            background-color: var(--bg-primary);
+            padding: 2px 6px;
+            border-radius: 3px;
+            border: 1px solid var(--border-color);
+            pointer-events: none;
+        }
+
+        /* Content Area */
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px 32px;
+        }
+
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding-left: 20px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, var(--cyan), var(--purple), var(--green));
+            opacity: 0.5;
+        }
+
+        .date-group {
+            margin-bottom: 32px;
+        }
+
+        .date-header {
+            font-family: 'Rajdhani', monospace;
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--cyan);
+            margin-bottom: 16px;
+            letter-spacing: 1px;
+        }
+
+        .memory-entry {
+            position: relative;
+            margin-bottom: 16px;
+            animation: slideIn 0.4s ease-out forwards;
+            opacity: 0;
+        }
+
+        .memory-entry:nth-child(1) { animation-delay: 0.05s; }
+        .memory-entry:nth-child(2) { animation-delay: 0.1s; }
+        .memory-entry:nth-child(3) { animation-delay: 0.15s; }
+        .memory-entry:nth-child(4) { animation-delay: 0.2s; }
+        .memory-entry:nth-child(5) { animation-delay: 0.25s; }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .memory-entry::before {
+            content: '';
+            position: absolute;
+            left: -30px;
+            top: 12px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: var(--cyan);
+            border: 2px solid var(--bg-primary);
+            box-shadow: 0 0 8px rgba(62, 186, 244, 0.3);
+        }
+
+        .memory-card {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .memory-card:hover {
+            border-color: var(--cyan);
+            background-color: rgba(62, 186, 244, 0.05);
+        }
+
+        .memory-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .memory-time {
+            font-family: 'Rajdhani', monospace;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .memory-agent-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-right: 8px;
+        }
+
+        .agent-claude {
+            background-color: rgba(62, 186, 244, 0.2);
+            color: var(--cyan);
+            border: 1px solid var(--cyan);
+        }
+
+        .agent-sentinel {
+            background-color: rgba(223, 48, 255, 0.2);
+            color: var(--purple);
+            border: 1px solid var(--purple);
+        }
+
+        .agent-task {
+            background-color: rgba(255, 233, 48, 0.2);
+            color: var(--yellow);
+            border: 1px solid var(--yellow);
+        }
+
+        .memory-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .pin-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.2s ease;
+            padding: 4px 8px;
+        }
+
+        .pin-btn:hover {
+            color: var(--yellow);
+            transform: scale(1.1);
+        }
+
+        .pin-btn.pinned {
+            color: var(--yellow);
+        }
+
+        .memory-content {
+            color: var(--text-secondary);
+            font-size: 13px;
+            line-height: 1.5;
+            margin-bottom: 12px;
+            max-height: 60px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+        }
+
+        .memory-content.expanded {
+            max-height: none;
+            -webkit-line-clamp: unset;
+        }
+
+        .memory-tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            background-color: var(--bg-primary);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+        }
+
+        .tag.decision {
+            background-color: rgba(255, 233, 48, 0.15);
+            color: var(--yellow);
+            border-color: rgba(255, 233, 48, 0.3);
+        }
+
+        .tag.learning {
+            background-color: rgba(62, 186, 244, 0.15);
+            color: var(--cyan);
+            border-color: rgba(62, 186, 244, 0.3);
+        }
+
+        .tag.observation {
+            background-color: rgba(0, 212, 155, 0.15);
+            color: var(--green);
+            border-color: rgba(0, 212, 155, 0.3);
+        }
+
+        .tag.task-result {
+            background-color: rgba(223, 48, 255, 0.15);
+            color: var(--purple);
+            border-color: rgba(223, 48, 255, 0.3);
+        }
+
+        .tag.conversation {
+            background-color: rgba(200, 150, 255, 0.15);
+            color: #c896ff;
+            border-color: rgba(200, 150, 255, 0.3);
+        }
+
+        .expand-indicator {
+            color: var(--text-secondary);
+            font-size: 12px;
+            margin-top: 8px;
+        }
+
+        .memory-card.expanded {
+            border-color: var(--cyan);
+            background-color: rgba(62, 186, 244, 0.1);
+        }
+
+        .related-section {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .related-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .related-item {
+            font-size: 12px;
+            padding: 6px 10px;
+            background-color: var(--bg-primary);
+            border-radius: 4px;
+            margin-bottom: 6px;
+            color: var(--text-secondary);
+        }
+
+        /* Durable Memory Section */
+        .durable-memory {
+            display: none;
+        }
+
+        .durable-memory.active {
+            display: block;
+        }
+
+        .memory-category {
+            margin-bottom: 28px;
+        }
+
+        .category-title {
+            font-family: 'Rajdhani', monospace;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--green);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .fact-item {
+            padding: 12px 16px;
+            background-color: var(--bg-secondary);
+            border-left: 3px solid var(--green);
+            margin-bottom: 8px;
+            border-radius: 4px;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+                max-height: 200px;
+                overflow-y: auto;
+            }
+
+            .content {
+                padding: 16px;
+            }
+
+            .stats-bar {
+                gap: 8px;
+                font-size: 12px;
+            }
+
+            .memory-card {
+                padding: 12px;
+            }
+
+            .header-title {
+                font-size: 18px;
+            }
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--cyan);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-section">
+                <div class="sidebar-title">Quick Presets</div>
+                <button class="preset-btn active" data-preset="all">All Memories</button>
+                <button class="preset-btn" data-preset="today">Today</button>
+                <button class="preset-btn" data-preset="week">This Week</button>
+                <button class="preset-btn" data-preset="pinned">Pinned</button>
+                <button class="preset-btn" data-preset="longterm">Long-term</button>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-title">Filter by Agent</div>
+                <div class="filter-group">
+                    <div class="filter-option">
+                        <input type="checkbox" id="agent-claude" value="claude" checked>
+                        <label for="agent-claude">Claude</label>
+                    </div>
+                    <div class="filter-option">
+                        <input type="checkbox" id="agent-sentinel" value="sentinel" checked>
+                        <label for="agent-sentinel">Sentinel</label>
+                    </div>
+                    <div class="filter-option">
+                        <input type="checkbox" id="agent-task" value="task" checked>
+                        <label for="agent-task">Task Manager</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-title">Filter by Type</div>
+                <div class="filter-group">
+                    <div class="filter-option">
+                        <input type="checkbox" id="type-decision" value="decision" checked>
+                        <label for="type-decision">Decision</label>
+                    </div>
+                    <div class="filter-option">
+                        <input type="checkbox" id="type-learning" value="learning" checked>
+                        <label for="type-learning">Learning</label>
+                    </div>
+                    <div class="filter-option">
+                        <input type="checkbox" id="type-observation" value="observation" checked>
+                        <label for="type-observation">Observation</label>
+                    </div>
+                    <div class="filter-option">
+                        <input type="checkbox" id="type-task" value="task-result" checked>
+                        <label for="type-task">Task Result</label>
+                    </div>
+                    <div class="filter-option">
+                        <input type="checkbox" id="type-conversation" value="conversation" checked>
+                        <label for="type-conversation">Conversation</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-title">Date Range</div>
+                <div class="date-range">
+                    <input type="date" class="date-input" id="date-from">
+                    <input type="date" class="date-input" id="date-to">
+                </div>
+                <button class="save-filter-btn">Save Filter</button>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <div class="header">
+                <div class="header-top">
+                    <div class="header-title">Memory</div>
+                    <div class="view-toggle">
+                        <button class="toggle-btn active" data-view="daily">Daily Journal</button>
+                        <button class="toggle-btn" data-view="durable">Durable Memory</button>
+                    </div>
+                </div>
+
+                <div class="stats-bar">
+                    <div class="stat-item">
+                        <div class="stat-label">Total Memories</div>
+                        <div class="stat-value" id="stat-total">42</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Today</div>
+                        <div class="stat-value" id="stat-today">8</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Pinned</div>
+                        <div class="stat-value" id="stat-pinned">3</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Most Active</div>
+                        <div class="stat-value" id="stat-active">Claude</div>
+                    </div>
+                </div>
+
+                <div class="search-container">
+                    <input type="text" class="search-bar" id="search-input" placeholder="Search your memory journal...">
+                    <span class="search-hint">Ctrl+K</span>
+                </div>
+            </div>
+
+            <!-- Content Area -->
+            <div class="content" id="content-area">
+                <!-- Daily Journal View -->
+                <div id="daily-view" class="timeline">
+                    <!-- Timeline entries will be inserted here -->
+                </div>
+
+                <!-- Durable Memory View -->
+                <div id="durable-view" class="durable-memory">
+                    <!-- Durable memory entries will be inserted here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample memory data
+        const memoryData = [
+            {
+                id: 1,
+                content: "Analyzed user feedback from project beta phase. Identified three major UX pain points: navigation complexity, slow load times, and unclear error messages. Recommended UI redesign focusing on simplification.",
+                agent: "claude",
+                type: "observation",
+                tags: ["observation", "learning"],
+                pinned: false,
+                timestamp: new Date(2026, 2, 28, 14, 32),
+                related: ["Project Beta Review", "UX Improvements"]
+            },
+            {
+                id: 2,
+                content: "Decided to prioritize fixing authentication flow over new feature development. This impacts sprint planning and pushes feature X to next iteration. Decision made in consultation with team lead.",
+                agent: "sentinel",
+                type: "decision",
+                tags: ["decision"],
+                pinned: true,
+                timestamp: new Date(2026, 2, 28, 11, 15),
+                related: ["Sprint Planning", "Auth Module"]
+            },
+            {
+                id: 3,
+                content: "Discovered that caching strategy can reduce API calls by 60%. Implemented Redis layer for frequently accessed endpoints. Performance improvement verified in staging environment.",
+                agent: "task",
+                type: "task-result",
+                tags: ["task-result", "learning"],
+                pinned: true,
+                timestamp: new Date(2026, 2, 28, 9, 47),
+                related: ["Performance Optimization", "Redis Setup"]
+            },
+            {
+                id: 4,
+                content: "User mentioned they prefer dark mode exclusively and have accessibility needs around font sizes. Made note to implement dynamic font scaling in preferences. Important for next UI update.",
+                agent: "claude",
+                type: "conversation",
+                tags: ["conversation", "observation"],
+                pinned: false,
+                timestamp: new Date(2026, 2, 27, 16, 23),
+                related: ["User Interview", "Accessibility"]
+            },
+            {
+                id: 5,
+                content: "Learned that the team uses a specific git workflow (trunk-based development) which differs from our assumed feature-branch approach. Adjusted CI/CD pipeline configuration accordingly.",
+                agent: "sentinel",
+                type: "learning",
+                tags: ["learning"],
+                pinned: false,
+                timestamp: new Date(2026, 2, 27, 13, 5),
+                related: ["CI/CD Pipeline", "Git Workflow"]
+            },
+            {
+                id: 6,
+                content: "Completed stress test on new database schema. System handled 10k concurrent connections without degradation. Ready for production deployment next week.",
+                agent: "task",
+                type: "task-result",
+                tags: ["task-result"],
+                pinned: true,
+                timestamp: new Date(2026, 2, 27, 10, 31),
+                related: ["Database Migration", "Load Testing"]
+            },
+            {
+                id: 7,
+                content: "Discussion with stakeholders revealed budget constraints that affect Q2 roadmap. Need to deprioritize cloud infrastructure expansion and focus on vendor consolidation instead.",
+                agent: "sentinel",
+                type: "decision",
+                tags: ["decision", "conversation"],
+                pinned: false,
+                timestamp: new Date(2026, 2, 26, 15, 42),
+                related: ["Q2 Planning", "Budget Review"]
+            },
+            {
+                id: 8,
+                content: "Observed pattern: errors spike during 2-3 PM UTC consistently. Likely correlated with European market opening hours and increased traffic. Needs investigation with data team.",
+                agent: "claude",
+                type: "observation",
+                tags: ["observation"],
+                pinned: false,
+                timestamp: new Date(2026, 2, 26, 11, 8),
+                related: ["Error Tracking", "Traffic Analysis"]
+            },
+            {
+                id: 9,
+                content: "Implemented automated backup strategy with 15-minute intervals. Created monitoring dashboard for backup health. All systems now have redundancy in place.",
+                agent: "task",
+                type: "task-result",
+                tags: ["task-result", "learning"],
+                pinned: false,
+                timestamp: new Date(2026, 2, 25, 14, 20),
+                related: ["Backup Systems", "Disaster Recovery"]
+            },
+            {
+                id: 10,
+                content: "Realized that API versioning strategy needs revision. Current v1 and v2 both in production is causing maintenance overhead. Proposed deprecation timeline to focus on v3 development.",
+                agent: "claude",
+                type: "decision",
+                tags: ["decision"],
+                pinned: false,
+                timestamp: new Date(2026, 2, 25, 9, 50),
+                related: ["API Management", "Version Control"]
+            }
+        ];
+
+        // Durable memory facts (curated, stable facts)
+        const durableMemory = {
+            "Core Principles": [
+                "User experience takes priority in all design decisions",
+                "Performance improvements compound over time - small wins matter",
+                "Clear communication prevents 70% of team issues"
+            ],
+            "Technical Insights": [
+                "Redis caching reduces API load by ~60% on frequently accessed endpoints",
+                "Trunk-based development is the team's preferred git strategy",
+                "System scales to 10k concurrent connections without degradation"
+            ],
+            "User Preferences": [
+                "Dark mode is primary preference for all regular users",
+                "Font size customization is critical accessibility requirement",
+                "Error messages should be explicit and actionable"
+            ],
+            "Operational Knowledge": [
+                "Traffic patterns show consistent spike during 2-3 PM UTC",
+                "European market opening correlates with increased error rates",
+                "Current backup strategy uses 15-minute intervals"
+            ]
+        };
+
+        // State
+        let filteredMemories = [...memoryData];
+        let expandedMemoryId = null;
+        let currentView = 'daily';
+        let searchDebounceTimer = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', init);
+
+        function init() {
+            setupEventListeners();
+            updateStats();
+            renderTimeline();
+            setupKeyboardShortcuts();
+        }
+
+        function setupEventListeners() {
+            // Preset buttons
+            document.querySelectorAll('.preset-btn').forEach(btn => {
+                btn.addEventListener('click', handlePresetClick);
+            });
+
+            // View toggle
+            document.querySelectorAll('.toggle-btn').forEach(btn => {
+                btn.addEventListener('click', handleViewToggle);
+            });
+
+            // Filters
+            document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                checkbox.addEventListener('change', applyFilters);
+            });
+
+            document.getElementById('date-from').addEventListener('change', applyFilters);
+            document.getElementById('date-to').addEventListener('change', applyFilters);
+
+            // Search
+            document.getElementById('search-input').addEventListener('input', handleSearch);
+
+            // Save filter
+            document.querySelector('.save-filter-btn').addEventListener('click', saveFilter);
+        }
+
+        function handlePresetClick(e) {
+            document.querySelectorAll('.preset-btn').forEach(btn => btn.classList.remove('active'));
+            e.target.classList.add('active');
+
+            const preset = e.target.dataset.preset;
+            const today = new Date();
+
+            if (preset === 'today') {
+                const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+                filteredMemories = memoryData.filter(m => m.timestamp >= todayStart);
+            } else if (preset === 'week') {
+                const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+                filteredMemories = memoryData.filter(m => m.timestamp >= weekAgo);
+            } else if (preset === 'pinned') {
+                filteredMemories = memoryData.filter(m => m.pinned);
+            } else if (preset === 'longterm') {
+                switchView('durable');
+                return;
+            } else {
+                filteredMemories = [...memoryData];
+            }
+
+            updateStats();
+            renderTimeline();
+        }
+
+        function handleViewToggle(e) {
+            document.querySelectorAll('.toggle-btn').forEach(btn => btn.classList.remove('active'));
+            e.target.classList.add('active');
+            switchView(e.target.dataset.view);
+        }
+
+        function switchView(view) {
+            currentView = view;
+            document.getElementById('daily-view').style.display = view === 'daily' ? 'block' : 'none';
+            document.getElementById('durable-view').classList.toggle('active', view === 'durable');
+
+            if (view === 'durable') {
+                renderDurableMemory();
+            } else {
+                renderTimeline();
+            }
+        }
+
+        function applyFilters() {
+            const selectedAgents = Array.from(document.querySelectorAll('input[id^="agent-"]:checked')).map(cb => cb.value);
+            const selectedTypes = Array.from(document.querySelectorAll('input[id^="type-"]:checked')).map(cb => cb.value);
+            const dateFrom = document.getElementById('date-from').value;
+            const dateTo = document.getElementById('date-to').value;
+
+            filteredMemories = memoryData.filter(memory => {
+                if (selectedAgents.length && !selectedAgents.includes(memory.agent)) return false;
+                if (selectedTypes.length && !memory.tags.some(tag => selectedTypes.includes(tag))) return false;
+                if (dateFrom && memory.timestamp < new Date(dateFrom)) return false;
+                if (dateTo && memory.timestamp > new Date(dateTo)) return false;
+                return true;
+            });
+
+            updateStats();
+            renderTimeline();
+        }
+
+        function handleSearch(e) {
+            clearTimeout(searchDebounceTimer);
+            const query = e.target.value.toLowerCase();
+
+            searchDebounceTimer = setTimeout(() => {
+                if (query === '') {
+                    applyFilters();
+                } else {
+                    filteredMemories = memoryData.filter(memory => {
+                        return memory.content.toLowerCase().includes(query) ||
+                               memory.agent.toLowerCase().includes(query) ||
+                               memory.tags.some(tag => tag.toLowerCase().includes(query));
+                    });
+                    renderTimeline();
+                }
+            }, 200);
+        }
+
+        function saveFilter() {
+            alert('Filter configuration saved!');
+        }
+
+        function updateStats() {
+            const today = new Date();
+            const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+            const todayMemories = memoryData.filter(m => m.timestamp >= todayStart);
+            const pinnedMemories = memoryData.filter(m => m.pinned);
+            const agents = {};
+            memoryData.forEach(m => {
+                agents[m.agent] = (agents[m.agent] || 0) + 1;
+            });
+            const mostActive = Object.entries(agents).sort((a, b) => b[1] - a[1])[0][0];
+
+            document.getElementById('stat-total').textContent = memoryData.length;
+            document.getElementById('stat-today').textContent = todayMemories.length;
+            document.getElementById('stat-pinned').textContent = pinnedMemories.length;
+            document.getElementById('stat-active').textContent = mostActive.charAt(0).toUpperCase() + mostActive.slice(1);
+        }
+
+        function renderTimeline() {
+            const timelineEl = document.getElementById('daily-view');
+            timelineEl.innerHTML = '';
+
+            if (filteredMemories.length === 0) {
+                timelineEl.innerHTML = '<p style="color: var(--text-secondary); padding: 20px;">No memories found</p>';
+                return;
+            }
+
+            const grouped = {};
+            filteredMemories.forEach(memory => {
+                const dateKey = memory.timestamp.toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+                if (!grouped[dateKey]) grouped[dateKey] = [];
+                grouped[dateKey].push(memory);
+            });
+
+            Object.entries(grouped).forEach(([date, memories]) => {
+                const dateGroup = document.createElement('div');
+                dateGroup.className = 'date-group';
+
+                const dateHeader = document.createElement('div');
+                dateHeader.className = 'date-header';
+                dateHeader.textContent = date;
+                dateGroup.appendChild(dateHeader);
+
+                memories.sort((a, b) => b.timestamp - a.timestamp).forEach(memory => {
+                    const entryEl = createMemoryEntry(memory);
+                    dateGroup.appendChild(entryEl);
+                });
+
+                timelineEl.appendChild(dateGroup);
+            });
+        }
+
+        function createMemoryEntry(memory) {
+            const entryDiv = document.createElement('div');
+            entryDiv.className = 'memory-entry';
+
+            const cardDiv = document.createElement('div');
+            cardDiv.className = 'memory-card';
+            cardDiv.onclick = () => toggleMemoryExpand(memory.id, cardDiv);
+
+            const headerDiv = document.createElement('div');
+            headerDiv.className = 'memory-header';
+
+            const timeDiv = document.createElement('div');
+            timeDiv.className = 'memory-time';
+            timeDiv.textContent = memory.timestamp.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+
+            const actionsDiv = document.createElement('div');
+            actionsDiv.className = 'memory-actions';
+
+            const agentBadge = document.createElement('span');
+            agentBadge.className = `memory-agent-badge agent-${memory.agent}`;
+            agentBadge.textContent = memory.agent.charAt(0).toUpperCase() + memory.agent.slice(1);
+
+            const pinBtn = document.createElement('button');
+            pinBtn.className = `pin-btn ${memory.pinned ? 'pinned' : ''}`;
+            pinBtn.textContent = memory.pinned ? '📌' : '📍';
+            pinBtn.onclick = (e) => {
+                e.stopPropagation();
+                memory.pinned = !memory.pinned;
+                pinBtn.classList.toggle('pinned');
+                pinBtn.textContent = memory.pinned ? '📌' : '📍';
+                updateStats();
+            };
+
+            actionsDiv.appendChild(agentBadge);
+            actionsDiv.appendChild(pinBtn);
+
+            headerDiv.appendChild(timeDiv);
+            headerDiv.appendChild(actionsDiv);
+
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'memory-content';
+            contentDiv.textContent = memory.content;
+
+            const tagsDiv = document.createElement('div');
+            tagsDiv.className = 'memory-tags';
+            memory.tags.forEach(tag => {
+                const tagEl = document.createElement('span');
+                tagEl.className = `tag ${tag}`;
+                tagEl.textContent = tag.replace('-', ' ');
+                tagsDiv.appendChild(tagEl);
+            });
+
+            cardDiv.appendChild(headerDiv);
+            cardDiv.appendChild(contentDiv);
+            cardDiv.appendChild(tagsDiv);
+
+            const expandIndicator = document.createElement('div');
+            expandIndicator.className = 'expand-indicator';
+            expandIndicator.textContent = 'Click to expand...';
+            cardDiv.appendChild(expandIndicator);
+
+            entryDiv.appendChild(cardDiv);
+            return entryDiv;
+        }
+
+        function toggleMemoryExpand(memoryId, cardEl) {
+            if (expandedMemoryId === memoryId) {
+                cardEl.classList.remove('expanded');
+                cardEl.querySelector('.memory-content').classList.remove('expanded');
+                cardEl.querySelector('.expand-indicator').textContent = 'Click to expand...';
+                expandedMemoryId = null;
+            } else {
+                // Close previous
+                if (expandedMemoryId) {
+                    document.querySelectorAll('.memory-card.expanded').forEach(card => {
+                        card.classList.remove('expanded');
+                        card.querySelector('.memory-content').classList.remove('expanded');
+                        card.querySelector('.expand-indicator').textContent = 'Click to expand...';
+                    });
+                }
+
+                expandedMemoryId = memoryId;
+                cardEl.classList.add('expanded');
+                cardEl.querySelector('.memory-content').classList.add('expanded');
+
+                // Add related section
+                const memory = memoryData.find(m => m.id === memoryId);
+                if (memory && memory.related && memory.related.length > 0) {
+                    let relatedSection = cardEl.querySelector('.related-section');
+                    if (!relatedSection) {
+                        relatedSection = document.createElement('div');
+                        relatedSection.className = 'related-section';
+                        relatedSection.innerHTML = '<div class="related-title">Related Items</div>';
+                        memory.related.forEach(item => {
+                            const itemEl = document.createElement('div');
+                            itemEl.className = 'related-item';
+                            itemEl.textContent = '→ ' + item;
+                            relatedSection.appendChild(itemEl);
+                        });
+                        cardEl.appendChild(relatedSection);
+                    }
+                }
+
+                cardEl.querySelector('.expand-indicator').textContent = 'Click to collapse...';
+            }
+        }
+
+        function renderDurableMemory() {
+            const durableView = document.getElementById('durable-view');
+            durableView.innerHTML = '';
+
+            Object.entries(durableMemory).forEach(([category, facts]) => {
+                const categoryDiv = document.createElement('div');
+                categoryDiv.className = 'memory-category';
+
+                const titleDiv = document.createElement('div');
+                titleDiv.className = 'category-title';
+                titleDiv.textContent = category;
+                categoryDiv.appendChild(titleDiv);
+
+                facts.forEach(fact => {
+                    const factDiv = document.createElement('div');
+                    factDiv.className = 'fact-item';
+                    factDiv.textContent = fact;
+                    categoryDiv.appendChild(factDiv);
+                });
+
+                durableView.appendChild(categoryDiv);
+            });
+        }
+
+        function setupKeyboardShortcuts() {
+            document.addEventListener('keydown', (e) => {
+                if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                    e.preventDefault();
+                    document.getElementById('search-input').focus();
+                }
+            });
+        }
+
+        // ── Gateway Event Bridge (receives events from parent HiveControl shell) ──
+        window.addEventListener('message', (event) => {
+            try {
+                if (event.data && event.data.type === 'hiveEvent') {
+                    const { event: evt, payload } = event.data;
+                    handleGatewayEvent(evt, payload);
+                }
+            } catch (_) {}
+        });
+
+        function handleGatewayEvent(event, payload) {
+            switch (event) {
+                case 'heartbeat':
+                    // Update any live status indicators
+                    break;
+                case 'agent':
+                    // Agent status change
+                    break;
+                case 'health':
+                    // Gateway health update
+                    break;
+                default:
+                    break;
+            }
+        }
+    </script>
+</body>
+</html>
