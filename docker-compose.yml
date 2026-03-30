@@ -1,0 +1,42 @@
+# ============================================================
+#  HiveClaw — Docker Compose
+#  One-command deployment: docker compose up -d
+# ============================================================
+
+services:
+  hiveclaw:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: hiveclaw-gateway
+    restart: unless-stopped
+    ports:
+      - "${OPENCLAW_GATEWAY_PORT:-18789}:18789"
+      - "${HIVEMEM_PORT:-8090}:8090"
+    volumes:
+      # Persist memory database across container restarts
+      - hiveclaw-data:/app/data
+      # Mount .env for configuration
+      - ./.env:/app/.env:ro
+    environment:
+      - NODE_ENV=production
+      - OPENCLAW_GATEWAY_HOST=0.0.0.0
+      - HIVEMEM_ENABLED=true
+      - HIVEMEM_SQLITE_PATH=/app/data/hivemem.db
+      - HIVEWORKFLOW_ENABLED=true
+      - GOVERNOR_ENABLED=true
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:18789/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  hiveclaw-data:
+    driver: local
