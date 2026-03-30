@@ -1,0 +1,12 @@
+node_modules
+.git
+.env
+.env.local
+data/
+docker-data/
+*.log
+.DS_Store
+Thumbs.db
+.vscode
+.idea
+upstream/
