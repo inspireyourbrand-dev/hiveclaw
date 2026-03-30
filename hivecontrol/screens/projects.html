@@ -1,0 +1,1214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projects — HiveControl OS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #0a0a0a;
+            color: #e0e0e0;
+            font-family: 'Poppins', sans-serif;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 32px 24px;
+        }
+
+        /* Header & Stats Bar */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 48px;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+
+        .header-title h1 {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 48px;
+            font-weight: 700;
+            color: #e0e0e0;
+            margin-bottom: 12px;
+        }
+
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+            margin-top: 24px;
+        }
+
+        .stat-card {
+            background-color: #1a1a1a;
+            padding: 16px;
+            border-radius: 8px;
+            border-left: 4px solid #3ebaf4;
+        }
+
+        .stat-card.active {
+            border-left-color: #00d49b;
+        }
+
+        .stat-card.completed {
+            border-left-color: #df30ff;
+        }
+
+        .stat-card.avg {
+            border-left-color: #ffe930;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            color: #888;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+
+        .stat-value {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 28px;
+            font-weight: 700;
+            color: #3ebaf4;
+        }
+
+        .stat-card.active .stat-value {
+            color: #00d49b;
+        }
+
+        .stat-card.completed .stat-value {
+            color: #df30ff;
+        }
+
+        .stat-card.avg .stat-value {
+            color: #ffe930;
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background-color: #3ebaf4;
+            color: #0a0a0a;
+        }
+
+        .btn-primary:hover {
+            background-color: #2ea5e0;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background-color: #1a1a1a;
+            color: #3ebaf4;
+            border: 2px solid #3ebaf4;
+        }
+
+        .btn-secondary:hover {
+            background-color: #3ebaf4;
+            color: #0a0a0a;
+        }
+
+        /* Filter/Sort */
+        .filter-sort {
+            display: flex;
+            gap: 12px;
+        }
+
+        select {
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+            border: 1px solid #333;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        select option {
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+        }
+
+        /* Project Grid */
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 24px;
+            margin-bottom: 48px;
+        }
+
+        @media (max-width: 768px) {
+            .projects-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Project Card */
+        .project-card {
+            background-color: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .project-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #3ebaf4, #df30ff, #00d49b);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .project-card:hover {
+            border-color: #3ebaf4;
+            box-shadow: 0 8px 24px rgba(62, 186, 244, 0.15);
+            transform: translateY(-4px);
+        }
+
+        .project-card:hover::before {
+            opacity: 1;
+        }
+
+        .project-card.expanded {
+            grid-column: 1 / -1;
+            max-height: none;
+        }
+
+        .project-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .project-name {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 22px;
+            font-weight: 700;
+            color: #3ebaf4;
+            flex: 1;
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .status-active {
+            background-color: rgba(0, 212, 155, 0.2);
+            color: #00d49b;
+        }
+
+        .status-hold {
+            background-color: rgba(255, 233, 48, 0.2);
+            color: #ffe930;
+        }
+
+        .status-completed {
+            background-color: rgba(223, 48, 255, 0.2);
+            color: #df30ff;
+        }
+
+        .project-description {
+            color: #888;
+            font-size: 13px;
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+        }
+
+        .progress-label-left {
+            color: #888;
+        }
+
+        .progress-label-right {
+            color: #3ebaf4;
+            font-weight: 600;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background-color: #0a0a0a;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3ebaf4, #00d49b);
+            border-radius: 3px;
+            transition: width 1s ease-out;
+            width: 0;
+        }
+
+        /* Task Count */
+        .task-count {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: #888;
+        }
+
+        .task-count-circle {
+            width: 24px;
+            height: 24px;
+            background-color: #0a0a0a;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 600;
+            color: #3ebaf4;
+        }
+
+        /* Agents */
+        .agents {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .agent-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3ebaf4, #df30ff);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 700;
+            color: #0a0a0a;
+            border: 2px solid #1a1a1a;
+        }
+
+        .agents-label {
+            font-size: 12px;
+            color: #888;
+        }
+
+        /* Last Updated */
+        .last-updated {
+            font-size: 11px;
+            color: #555;
+            border-top: 1px solid #2a2a2a;
+            padding-top: 12px;
+            margin-top: 8px;
+        }
+
+        /* Expanded View */
+        .expanded-content {
+            display: none;
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid #2a2a2a;
+        }
+
+        .project-card.expanded .expanded-content {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-12px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .expanded-section {
+            margin-bottom: 32px;
+        }
+
+        .expanded-section-title {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 16px;
+            font-weight: 600;
+            color: #3ebaf4;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+        }
+
+        .full-description {
+            color: #aaa;
+            line-height: 1.8;
+            font-size: 14px;
+        }
+
+        .mini-kanban {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 12px;
+        }
+
+        .kanban-column {
+            background-color: #0a0a0a;
+            border-radius: 8px;
+            padding: 12px;
+            border: 1px solid #2a2a2a;
+        }
+
+        .kanban-column-title {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #888;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .kanban-count {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 24px;
+            font-weight: 700;
+            color: #3ebaf4;
+        }
+
+        .timeline {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .timeline-item {
+            display: flex;
+            gap: 12px;
+            font-size: 13px;
+        }
+
+        .timeline-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #3ebaf4;
+            border-radius: 50%;
+            margin-top: 6px;
+            flex-shrink: 0;
+        }
+
+        .timeline-content {
+            color: #aaa;
+        }
+
+        .timeline-time {
+            color: #666;
+            font-size: 12px;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background-color: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 32px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .modal-title {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 24px;
+            font-weight: 700;
+            color: #e0e0e0;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 24px;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .modal-close:hover {
+            color: #e0e0e0;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #aaa;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            padding: 10px 12px;
+            background-color: #0a0a0a;
+            border: 1px solid #2a2a2a;
+            border-radius: 6px;
+            color: #e0e0e0;
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #3ebaf4;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .agent-selector {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .agent-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px;
+            background-color: #0a0a0a;
+            border: 1px solid #2a2a2a;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .agent-checkbox input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+            cursor: pointer;
+        }
+
+        .agent-checkbox:has(input:checked) {
+            background-color: #3ebaf4;
+            border-color: #3ebaf4;
+            color: #0a0a0a;
+        }
+
+        .form-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .btn-cancel {
+            background-color: #0a0a0a;
+            color: #888;
+            border: 1px solid #2a2a2a;
+            flex: 1;
+        }
+
+        .btn-cancel:hover {
+            background-color: #1a1a1a;
+        }
+
+        .btn-submit {
+            flex: 1;
+        }
+
+        /* Reverse Prompt Suggestion */
+        .reverse-prompt-btn {
+            background: linear-gradient(135deg, #df30ff, #3ebaf4);
+            color: #0a0a0a;
+            padding: 12px 24px;
+        }
+
+        .reverse-prompt-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(223, 48, 255, 0.3);
+        }
+
+        .suggestion-panel {
+            display: none;
+            background-color: #1a1a1a;
+            border: 2px solid #df30ff;
+            border-radius: 12px;
+            padding: 24px;
+            margin-top: 24px;
+            animation: slideIn 0.3s ease;
+        }
+
+        .suggestion-panel.active {
+            display: block;
+        }
+
+        .suggestion-title {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            color: #df30ff;
+            margin-bottom: 12px;
+        }
+
+        .suggestion-task {
+            background-color: #0a0a0a;
+            padding: 16px;
+            border-radius: 8px;
+            border-left: 4px solid #df30ff;
+            margin-bottom: 12px;
+        }
+
+        .suggestion-task-name {
+            font-weight: 600;
+            color: #3ebaf4;
+            margin-bottom: 6px;
+        }
+
+        .suggestion-task-impact {
+            font-size: 12px;
+            color: #888;
+        }
+
+        .suggestion-impact-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
+            font-size: 12px;
+        }
+
+        .impact-value {
+            color: #df30ff;
+            font-weight: 600;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 48px 24px;
+            color: #666;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .empty-state-text {
+            margin-bottom: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header with Stats -->
+        <div class="header">
+            <div class="header-title">
+                <h1>Projects</h1>
+                <div class="stats-bar">
+                    <div class="stat-card">
+                        <div class="stat-label">Total Projects</div>
+                        <div class="stat-value" id="statTotal">0</div>
+                    </div>
+                    <div class="stat-card active">
+                        <div class="stat-label">Active</div>
+                        <div class="stat-value" id="statActive">0</div>
+                    </div>
+                    <div class="stat-card completed">
+                        <div class="stat-label">Completed</div>
+                        <div class="stat-value" id="statCompleted">0</div>
+                    </div>
+                    <div class="stat-card avg">
+                        <div class="stat-label">Avg Progress</div>
+                        <div class="stat-value" id="statAvg">0%</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button class="btn btn-primary" id="newProjectBtn">+ New Project</button>
+                <div class="filter-sort">
+                    <select id="filterStatus">
+                        <option value="">All Status</option>
+                        <option value="Active">Active</option>
+                        <option value="On Hold">On Hold</option>
+                        <option value="Completed">Completed</option>
+                    </select>
+                    <select id="sortBy">
+                        <option value="name">Sort by Name</option>
+                        <option value="progress">Sort by Progress</option>
+                        <option value="updated">Sort by Updated</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Projects Grid -->
+        <div class="projects-grid" id="projectsGrid">
+            <!-- Populated dynamically -->
+        </div>
+    </div>
+
+    <!-- Modal for Create/Edit Project -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">New Project</h2>
+                <button class="modal-close" id="closeModal">&times;</button>
+            </div>
+
+            <form id="projectForm">
+                <div class="form-group">
+                    <label class="form-label" for="projectName">Project Name *</label>
+                    <input type="text" id="projectName" required placeholder="Enter project name">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="projectDescription">Description</label>
+                    <textarea id="projectDescription" placeholder="Project description..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="projectStatus">Status</label>
+                    <select id="projectStatus">
+                        <option value="Active">Active</option>
+                        <option value="On Hold">On Hold</option>
+                        <option value="Completed">Completed</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Linked Agents</label>
+                    <div class="agent-selector" id="agentSelector">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+
+                <div class="form-buttons">
+                    <button type="button" class="btn btn-cancel" id="cancelBtn">Cancel</button>
+                    <button type="submit" class="btn btn-primary btn-submit">Create Project</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Data Management
+        const STORAGE_KEY = 'hivecontrol_projects';
+        const AGENTS = ['Alex', 'Bots', 'Cora', 'Data'];
+
+        // Sample projects
+        const defaultProjects = [
+            {
+                id: 1,
+                name: 'HiveControl OS v0.1',
+                description: 'Core operating system and user interface. Building the foundation for multi-agent coordination.',
+                status: 'Active',
+                progress: 75,
+                totalTasks: 24,
+                completedTasks: 18,
+                linkedAgents: ['Alex', 'Bots'],
+                linkedTasks: [
+                    { name: 'UI Framework', status: 'Done' },
+                    { name: 'Agent Integration', status: 'In Progress' },
+                    { name: 'Memory System', status: 'In Progress' },
+                    { name: 'Testing Suite', status: 'To Do' }
+                ],
+                updatedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+                timeline: [
+                    { time: '2 days ago', text: 'UI Framework completed' },
+                    { time: '5 days ago', text: 'Agent Integration started' },
+                    { time: '1 week ago', text: 'Project initialized' }
+                ]
+            },
+            {
+                id: 2,
+                name: 'HiveWorkflow Engine',
+                description: 'Task automation and workflow orchestration system. Enables agents to chain operations seamlessly.',
+                status: 'Active',
+                progress: 10,
+                totalTasks: 18,
+                completedTasks: 2,
+                linkedAgents: ['Cora'],
+                linkedTasks: [
+                    { name: 'Workflow Schema', status: 'In Progress' },
+                    { name: 'Execution Engine', status: 'To Do' },
+                    { name: 'Event System', status: 'To Do' }
+                ],
+                updatedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+                timeline: [
+                    { time: '1 week ago', text: 'Workflow Schema started' },
+                    { time: '1 week ago', text: 'Project created' }
+                ]
+            },
+            {
+                id: 3,
+                name: 'Governor Mode Optimization',
+                description: 'Performance tuning and resource management. Maximizing throughput while maintaining stability.',
+                status: 'Active',
+                progress: 90,
+                totalTasks: 12,
+                completedTasks: 11,
+                linkedAgents: ['Data', 'Bots'],
+                linkedTasks: [
+                    { name: 'Caching Layer', status: 'Done' },
+                    { name: 'Query Optimization', status: 'Done' },
+                    { name: 'Load Testing', status: 'In Progress' }
+                ],
+                updatedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+                timeline: [
+                    { time: '1 day ago', text: 'Load Testing initiated' },
+                    { time: '3 days ago', text: 'Query Optimization completed' },
+                    { time: '1 week ago', text: 'Caching Layer deployed' }
+                ]
+            },
+            {
+                id: 4,
+                name: 'Brand Consistency Audit',
+                description: 'Design system review and standardization. Ensuring visual consistency across all interfaces.',
+                status: 'On Hold',
+                progress: 40,
+                totalTasks: 20,
+                completedTasks: 8,
+                linkedAgents: ['Alex'],
+                linkedTasks: [
+                    { name: 'Design Inventory', status: 'Done' },
+                    { name: 'Inconsistency Report', status: 'Done' },
+                    { name: 'Component Library', status: 'In Progress' }
+                ],
+                updatedAt: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
+                timeline: [
+                    { time: '2 weeks ago', text: 'Design Inventory completed' },
+                    { time: '2 weeks ago', text: 'Inconsistency Report filed' }
+                ]
+            }
+        ];
+
+        let projects = [];
+        let currentFilter = '';
+        let currentSort = 'name';
+        let expandedProjectId = null;
+
+        // Initialize
+        function init() {
+            loadProjects();
+            renderProjects();
+            updateStats();
+            setupEventListeners();
+        }
+
+        function loadProjects() {
+            const stored = localStorage.getItem(STORAGE_KEY);
+            if (stored) {
+                projects = JSON.parse(stored);
+            } else {
+                projects = defaultProjects;
+                saveProjects();
+            }
+        }
+
+        function saveProjects() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
+        }
+
+        function setupEventListeners() {
+            document.getElementById('newProjectBtn').addEventListener('click', openNewProjectModal);
+            document.getElementById('closeModal').addEventListener('click', closeModal);
+            document.getElementById('cancelBtn').addEventListener('click', closeModal);
+            document.getElementById('projectForm').addEventListener('submit', handleFormSubmit);
+            document.getElementById('modalOverlay').addEventListener('click', (e) => {
+                if (e.target === e.currentTarget) closeModal();
+            });
+            document.getElementById('filterStatus').addEventListener('change', (e) => {
+                currentFilter = e.target.value;
+                renderProjects();
+            });
+            document.getElementById('sortBy').addEventListener('change', (e) => {
+                currentSort = e.target.value;
+                renderProjects();
+            });
+        }
+
+        function getFilteredAndSortedProjects() {
+            let filtered = projects;
+
+            if (currentFilter) {
+                filtered = filtered.filter(p => p.status === currentFilter);
+            }
+
+            filtered.sort((a, b) => {
+                if (currentSort === 'name') {
+                    return a.name.localeCompare(b.name);
+                } else if (currentSort === 'progress') {
+                    return b.progress - a.progress;
+                } else if (currentSort === 'updated') {
+                    return new Date(b.updatedAt) - new Date(a.updatedAt);
+                }
+                return 0;
+            });
+
+            return filtered;
+        }
+
+        function renderProjects() {
+            const grid = document.getElementById('projectsGrid');
+            const filtered = getFilteredAndSortedProjects();
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `
+                    <div style="grid-column: 1 / -1;">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📋</div>
+                            <div class="empty-state-text">No projects found</div>
+                            <button class="btn btn-primary" id="createFromEmpty">+ Create Project</button>
+                        </div>
+                    </div>
+                `;
+                document.getElementById('createFromEmpty').addEventListener('click', openNewProjectModal);
+                return;
+            }
+
+            grid.innerHTML = filtered.map(project => `
+                <div class="project-card ${expandedProjectId === project.id ? 'expanded' : ''}" data-project-id="${project.id}">
+                    <div class="project-header">
+                        <div class="project-name">${escapeHtml(project.name)}</div>
+                        <span class="status-badge status-${project.status.toLowerCase().replace(' ', '-')}">${project.status}</span>
+                    </div>
+
+                    <div class="project-description">${escapeHtml(project.description)}</div>
+
+                    <div class="progress-container">
+                        <div class="progress-label">
+                            <span class="progress-label-left">Progress</span>
+                            <span class="progress-label-right">${project.progress}%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 0"></div>
+                        </div>
+                    </div>
+
+                    <div class="task-count">
+                        <span>${project.completedTasks} / ${project.totalTasks} tasks completed</span>
+                        <div class="task-count-circle">${project.completedTasks}</div>
+                    </div>
+
+                    <div class="agents">
+                        ${project.linkedAgents.map(agent => `
+                            <div class="agent-avatar" title="${agent}">${agent.charAt(0)}</div>
+                        `).join('')}
+                        <span class="agents-label">${project.linkedAgents.length} linked</span>
+                    </div>
+
+                    <div class="last-updated">Last updated ${formatDate(project.updatedAt)}</div>
+
+                    ${expandedProjectId === project.id ? `
+                        <div class="expanded-content">
+                            <div class="expanded-section">
+                                <div class="expanded-section-title">Full Description</div>
+                                <div class="full-description">${escapeHtml(project.description)}</div>
+                            </div>
+
+                            <div class="expanded-section">
+                                <div class="expanded-section-title">Task Status</div>
+                                <div class="mini-kanban">
+                                    <div class="kanban-column">
+                                        <div class="kanban-column-title">To Do</div>
+                                        <div class="kanban-count">${project.totalTasks - project.completedTasks - 2}</div>
+                                    </div>
+                                    <div class="kanban-column">
+                                        <div class="kanban-column-title">In Progress</div>
+                                        <div class="kanban-count">2</div>
+                                    </div>
+                                    <div class="kanban-column">
+                                        <div class="kanban-column-title">Done</div>
+                                        <div class="kanban-count">${project.completedTasks}</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="expanded-section">
+                                <div class="expanded-section-title">Activity</div>
+                                <div class="timeline">
+                                    ${project.timeline.map(event => `
+                                        <div class="timeline-item">
+                                            <div class="timeline-dot"></div>
+                                            <div>
+                                                <div class="timeline-content">${event.text}</div>
+                                                <div class="timeline-time">${event.time}</div>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+
+                            <div class="expanded-section">
+                                <button class="btn reverse-prompt-btn" onclick="showReverseSuggestion(${project.id})">What task moves us closest to completing this project?</button>
+                                <div class="suggestion-panel" id="suggestion-${project.id}">
+                                    <div class="suggestion-title">Recommended Next Task</div>
+                                    <div class="suggestion-task">
+                                        <div class="suggestion-task-name">Load Testing Implementation</div>
+                                        <div class="suggestion-task-impact">From: Governor Mode Optimization</div>
+                                        <div class="suggestion-impact-bar">
+                                            <span>Impact:</span>
+                                            <span class="impact-value">+15% to project completion</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+
+            // Add click handlers for card expansion and animate progress bars
+            grid.querySelectorAll('.project-card').forEach(card => {
+                card.addEventListener('click', function(e) {
+                    if (e.target.closest('button')) return;
+                    const projectId = parseInt(this.dataset.projectId);
+                    expandedProjectId = expandedProjectId === projectId ? null : projectId;
+                    renderProjects();
+                });
+
+                // Animate progress bars
+                const projectId = parseInt(card.dataset.projectId);
+                const project = projects.find(p => p.id === projectId);
+                setTimeout(() => {
+                    const fill = card.querySelector('.progress-fill');
+                    if (fill) fill.style.width = project.progress + '%';
+                }, 50);
+            });
+        }
+
+        function updateStats() {
+            const total = projects.length;
+            const active = projects.filter(p => p.status === 'Active').length;
+            const completed = projects.filter(p => p.status === 'Completed').length;
+            const avgProgress = Math.round(projects.reduce((sum, p) => sum + p.progress, 0) / projects.length) || 0;
+
+            document.getElementById('statTotal').textContent = total;
+            document.getElementById('statActive').textContent = active;
+            document.getElementById('statCompleted').textContent = completed;
+            document.getElementById('statAvg').textContent = avgProgress + '%';
+        }
+
+        function openNewProjectModal() {
+            document.getElementById('projectForm').reset();
+            document.getElementById('modalTitle').textContent = 'New Project';
+            document.getElementById('projectStatus').value = 'Active';
+            populateAgentSelector();
+            document.getElementById('modalOverlay').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.remove('active');
+        }
+
+        function populateAgentSelector() {
+            const selector = document.getElementById('agentSelector');
+            selector.innerHTML = AGENTS.map(agent => `
+                <label class="agent-checkbox">
+                    <input type="checkbox" name="agent" value="${agent}">
+                    <span>${agent}</span>
+                </label>
+            `).join('');
+        }
+
+        function handleFormSubmit(e) {
+            e.preventDefault();
+
+            const name = document.getElementById('projectName').value;
+            const description = document.getElementById('projectDescription').value;
+            const status = document.getElementById('projectStatus').value;
+            const linkedAgents = Array.from(document.querySelectorAll('input[name="agent"]:checked')).map(cb => cb.value);
+
+            const newProject = {
+                id: Math.max(...projects.map(p => p.id), 0) + 1,
+                name,
+                description,
+                status,
+                progress: 0,
+                totalTasks: 5,
+                completedTasks: 0,
+                linkedAgents,
+                linkedTasks: [
+                    { name: 'Planning', status: 'To Do' },
+                    { name: 'Development', status: 'To Do' },
+                    { name: 'Testing', status: 'To Do' }
+                ],
+                updatedAt: new Date().toISOString(),
+                timeline: [
+                    { time: 'just now', text: 'Project created' }
+                ]
+            };
+
+            projects.push(newProject);
+            saveProjects();
+            updateStats();
+            renderProjects();
+            closeModal();
+        }
+
+        function showReverseSuggestion(projectId) {
+            const panel = document.getElementById(`suggestion-${projectId}`);
+            if (panel) {
+                panel.classList.toggle('active');
+            }
+        }
+
+        function formatDate(isoString) {
+            const date = new Date(isoString);
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMs / 3600000);
+            const diffDays = Math.floor(diffMs / 86400000);
+
+            if (diffMins < 1) return 'just now';
+            if (diffMins < 60) return `${diffMins}m ago`;
+            if (diffHours < 24) return `${diffHours}h ago`;
+            if (diffDays < 7) return `${diffDays}d ago`;
+
+            return date.toLocaleDateString();
+        }
+
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+
+        // Start
+        init();
+
+        // ── Gateway Event Bridge (receives events from parent HiveControl shell) ──
+        window.addEventListener('message', (event) => {
+            try {
+                if (event.data && event.data.type === 'hiveEvent') {
+                    const { event: evt, payload } = event.data;
+                    handleGatewayEvent(evt, payload);
+                }
+            } catch (_) {}
+        });
+
+        function handleGatewayEvent(event, payload) {
+            switch (event) {
+                case 'heartbeat':
+                    // Update any live status indicators
+                    break;
+                case 'agent':
+                    // Agent status change
+                    break;
+                case 'health':
+                    // Gateway health update
+                    break;
+                default:
+                    break;
+            }
+        }
+    </script>
+</body>
+</html>
