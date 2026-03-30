@@ -116,7 +116,7 @@ if (config.hivemem.enabled && config.hivemem.storage === 'sqlite') {
       storage: 'sqlite',
       sqlitePath: config.hivemem.sqlitePath,
     });
-    hivememMiddleware.initialize();
+    await hivememMiddleware.initialize();
     console.log(`  [HiveMem] SQLite initialized at ${config.hivemem.sqlitePath}`);
   } catch (err) {
     console.warn(`  [HiveMem] SQLite init failed, falling back to in-memory: ${err.message}`);
