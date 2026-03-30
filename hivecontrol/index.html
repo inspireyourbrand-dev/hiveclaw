@@ -825,9 +825,10 @@
                         window.hiveStore = new HiveStore();
                     }
 
-                    // Connection status listener
-                    wsClient.on('connectionChange', (e) => {
-                        const { connected, reconnecting } = e.detail || e;
+                    // Connection status listener (ws-client emits '_status' events)
+                    wsClient.on('_status', (e) => {
+                        const connected = e.status === 'connected';
+                        const reconnecting = e.status === 'reconnecting';
                         updateConnectionStatus(connected, reconnecting);
                     });
 
