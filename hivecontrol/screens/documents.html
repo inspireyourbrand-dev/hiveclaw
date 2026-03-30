@@ -1,0 +1,1337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documents - HiveControl OS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #0a0a0a;
+            color: #e0e0e0;
+            padding: 24px;
+            min-height: 100vh;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 700;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            color: #3ebaf4;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .view-toggle {
+            display: flex;
+            gap: 8px;
+            background-color: #1a1a1a;
+            padding: 6px;
+            border-radius: 6px;
+            border: 1px solid #2a2a2a;
+        }
+
+        .view-toggle button {
+            padding: 6px 12px;
+            border: none;
+            background: transparent;
+            color: #888;
+            cursor: pointer;
+            border-radius: 4px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .view-toggle button.active {
+            background-color: #3ebaf4;
+            color: #0a0a0a;
+        }
+
+        .btn-new {
+            padding: 10px 16px;
+            background-color: #3ebaf4;
+            color: #0a0a0a;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-new:hover {
+            background-color: #2da8d8;
+            transform: translateY(-2px);
+        }
+
+        /* Search Bar */
+        .search-container {
+            margin-bottom: 24px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 16px;
+            background-color: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 6px;
+            color: #e0e0e0;
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #3ebaf4;
+            box-shadow: 0 0 12px rgba(62, 186, 244, 0.2);
+        }
+
+        /* Main Container */
+        .main-container {
+            display: flex;
+            gap: 24px;
+            min-height: 600px;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 240px;
+            background-color: #1a1a1a;
+            border-radius: 6px;
+            padding: 20px;
+            border: 1px solid #2a2a2a;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .sidebar h3 {
+            font-size: 14px;
+            color: #3ebaf4;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .filter-group {
+            margin-bottom: 24px;
+        }
+
+        .filter-option {
+            display: flex;
+            align-items: center;
+            padding: 8px 0;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filter-option input[type="checkbox"] {
+            margin-right: 8px;
+            cursor: pointer;
+            accent-color: #3ebaf4;
+        }
+
+        .filter-option label {
+            cursor: pointer;
+            font-size: 14px;
+            flex: 1;
+        }
+
+        .filter-option:hover label {
+            color: #3ebaf4;
+        }
+
+        .filter-count {
+            font-size: 12px;
+            color: #666;
+            margin-left: auto;
+        }
+
+        /* Date Range */
+        .date-range {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .date-range input {
+            padding: 8px;
+            background-color: #0a0a0a;
+            border: 1px solid #2a2a2a;
+            border-radius: 4px;
+            color: #e0e0e0;
+            font-size: 12px;
+        }
+
+        /* Content Area */
+        .content {
+            flex: 1;
+        }
+
+        .stats-bar {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 24px;
+            padding: 16px;
+            background-color: #1a1a1a;
+            border-radius: 6px;
+            border: 1px solid #2a2a2a;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-size: 18px;
+            font-weight: 600;
+            color: #3ebaf4;
+        }
+
+        /* Grid View */
+        .documents-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .document-card {
+            background-color: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .document-card:hover {
+            border-color: #3ebaf4;
+            box-shadow: 0 8px 24px rgba(62, 186, 244, 0.15);
+            transform: translateY(-4px);
+        }
+
+        .doc-header {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .doc-icon {
+            width: 40px;
+            height: 40px;
+            background-color: #0a0a0a;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+            font-weight: 600;
+        }
+
+        .doc-icon.md { color: #3ebaf4; }
+        .doc-icon.html { color: #df30ff; }
+        .doc-icon.pdf { color: #ff4444; }
+        .doc-icon.txt { color: #888; }
+        .doc-icon.code { color: #ffe930; }
+
+        .doc-title-block {
+            flex: 1;
+        }
+
+        .doc-title {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 16px;
+            font-weight: 600;
+            color: #e0e0e0;
+            margin-bottom: 4px;
+            word-break: break-word;
+        }
+
+        .doc-preview {
+            font-size: 12px;
+            color: #888;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .doc-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding-top: 12px;
+            border-top: 1px solid #2a2a2a;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 8px;
+            background-color: #0a0a0a;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .badge-author {
+            color: #3ebaf4;
+            border-left: 2px solid #3ebaf4;
+            padding-left: 6px;
+        }
+
+        .badge-project {
+            color: #df30ff;
+            border-left: 2px solid #df30ff;
+            padding-left: 6px;
+        }
+
+        .badge-date {
+            color: #888;
+            margin-left: auto;
+        }
+
+        .doc-size {
+            font-size: 11px;
+            color: #666;
+        }
+
+        /* List View */
+        .documents-list {
+            background-color: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .list-header {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr 1fr 80px;
+            gap: 16px;
+            padding: 16px;
+            background-color: #0a0a0a;
+            border-bottom: 1px solid #2a2a2a;
+            font-size: 12px;
+            font-weight: 600;
+            color: #3ebaf4;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .list-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr 1fr 80px;
+            gap: 16px;
+            padding: 16px;
+            border-bottom: 1px solid #2a2a2a;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .list-row:hover {
+            background-color: #0a0a0a;
+        }
+
+        .list-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 0;
+        }
+
+        .list-title-text {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .list-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        .action-btn {
+            width: 28px;
+            height: 28px;
+            background-color: #0a0a0a;
+            border: none;
+            border-radius: 4px;
+            color: #888;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .action-btn:hover {
+            background-color: #2a2a2a;
+            color: #3ebaf4;
+        }
+
+        /* Preview Panel */
+        .preview-panel {
+            position: fixed;
+            right: 0;
+            top: 0;
+            width: 400px;
+            height: 100vh;
+            background-color: #1a1a1a;
+            border-left: 1px solid #2a2a2a;
+            overflow-y: auto;
+            z-index: 1000;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .preview-panel.open {
+            transform: translateX(0);
+        }
+
+        .preview-header {
+            padding: 20px;
+            border-bottom: 1px solid #2a2a2a;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .preview-header h2 {
+            font-size: 18px;
+            color: #3ebaf4;
+        }
+
+        .btn-close {
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-close:hover {
+            color: #3ebaf4;
+        }
+
+        .preview-content {
+            padding: 20px;
+            overflow-y: auto;
+            flex: 1;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .preview-content h1 { font-size: 24px; margin: 16px 0 8px; color: #3ebaf4; }
+        .preview-content h2 { font-size: 20px; margin: 14px 0 6px; color: #3ebaf4; }
+        .preview-content h3 { font-size: 16px; margin: 12px 0 4px; color: #3ebaf4; }
+        .preview-content strong { color: #ffe930; }
+        .preview-content em { color: #df30ff; }
+        .preview-content code {
+            background-color: #0a0a0a;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #00d49b;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+        .preview-content pre {
+            background-color: #0a0a0a;
+            padding: 12px;
+            border-radius: 4px;
+            overflow-x: auto;
+            margin: 12px 0;
+            border-left: 3px solid #00d49b;
+        }
+        .preview-content pre code { padding: 0; background: none; }
+        .preview-content ul, .preview-content ol { margin: 12px 0 12px 20px; }
+        .preview-content li { margin: 6px 0; }
+        .preview-content blockquote {
+            border-left: 3px solid #df30ff;
+            padding-left: 12px;
+            margin: 12px 0;
+            color: #888;
+        }
+
+        .preview-meta {
+            padding: 20px;
+            background-color: #0a0a0a;
+            border-top: 1px solid #2a2a2a;
+            flex-shrink: 0;
+        }
+
+        .meta-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 12px;
+        }
+
+        .meta-label { color: #666; }
+        .meta-value { color: #3ebaf4; }
+
+        .preview-actions {
+            display: flex;
+            gap: 8px;
+            padding: 20px;
+            border-top: 1px solid #2a2a2a;
+            flex-shrink: 0;
+        }
+
+        .btn-action {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #2a2a2a;
+            background-color: #0a0a0a;
+            color: #3ebaf4;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-action:hover {
+            background-color: #2a2a2a;
+            border-color: #3ebaf4;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .modal-overlay.open {
+            display: flex;
+        }
+
+        .modal {
+            background-color: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            padding: 24px;
+        }
+
+        .modal h2 {
+            color: #3ebaf4;
+            margin-bottom: 16px;
+            font-size: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            background-color: #0a0a0a;
+            border: 1px solid #2a2a2a;
+            border-radius: 4px;
+            color: #e0e0e0;
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+        }
+
+        .form-group textarea {
+            min-height: 200px;
+            resize: vertical;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #3ebaf4;
+            box-shadow: 0 0 12px rgba(62, 186, 244, 0.2);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        .btn-primary {
+            padding: 10px 16px;
+            background-color: #3ebaf4;
+            color: #0a0a0a;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-primary:hover {
+            background-color: #2da8d8;
+        }
+
+        .btn-secondary {
+            padding: 10px 16px;
+            background-color: transparent;
+            color: #3ebaf4;
+            border: 1px solid #3ebaf4;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary:hover {
+            background-color: #3ebaf4;
+            color: #0a0a0a;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .main-container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                max-height: none;
+            }
+
+            .documents-grid {
+                grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            }
+
+            .preview-panel {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .documents-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .list-header,
+            .list-row {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .header-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .stats-bar {
+                flex-wrap: wrap;
+            }
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #2a2a2a;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #3a3a3a;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .empty-state h3 {
+            color: #888;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <h1>Documents</h1>
+        <div class="header-actions">
+            <div class="view-toggle">
+                <button class="view-btn active" data-view="grid">⊞ Grid</button>
+                <button class="view-btn" data-view="list">≡ List</button>
+            </div>
+            <button class="btn-new" onclick="openCreateModal()">+ New Document</button>
+        </div>
+    </div>
+
+    <!-- Search -->
+    <div class="search-container">
+        <input
+            type="text"
+            class="search-input"
+            id="searchInput"
+            placeholder="Search documents by title, author, project..."
+        >
+    </div>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <h3>Format</h3>
+            <div class="filter-group">
+                <label class="filter-option">
+                    <input type="checkbox" class="format-filter" value="Markdown" checked>
+                    <span>Markdown</span>
+                    <span class="filter-count">4</span>
+                </label>
+                <label class="filter-option">
+                    <input type="checkbox" class="format-filter" value="HTML">
+                    <span>HTML</span>
+                    <span class="filter-count">1</span>
+                </label>
+                <label class="filter-option">
+                    <input type="checkbox" class="format-filter" value="PDF">
+                    <span>PDF</span>
+                    <span class="filter-count">1</span>
+                </label>
+            </div>
+
+            <h3>Author</h3>
+            <div class="filter-group" id="authorFilter"></div>
+
+            <h3>Project</h3>
+            <div class="filter-group" id="projectFilter"></div>
+
+            <h3>Date Range</h3>
+            <div class="filter-group">
+                <div class="date-range">
+                    <input type="date" id="dateFrom" placeholder="From">
+                    <input type="date" id="dateTo" placeholder="To">
+                </div>
+            </div>
+        </aside>
+
+        <!-- Content -->
+        <main class="content">
+            <!-- Stats Bar -->
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <span class="stat-label">Total Documents</span>
+                    <span class="stat-value" id="statTotal">6</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Markdown</span>
+                    <span class="stat-value" id="statMarkdown">4</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">HTML</span>
+                    <span class="stat-value" id="statHTML">1</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">PDF</span>
+                    <span class="stat-value" id="statPDF">1</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Most Prolific</span>
+                    <span class="stat-value" id="statAuthor">Orion</span>
+                </div>
+            </div>
+
+            <!-- Documents Grid -->
+            <div class="documents-grid" id="documentsGrid"></div>
+
+            <!-- Documents List -->
+            <div class="documents-list" id="documentsList" style="display: none;">
+                <div class="list-header">
+                    <div>Title</div>
+                    <div>Format</div>
+                    <div>Author</div>
+                    <div>Project</div>
+                    <div>Date</div>
+                    <div>Actions</div>
+                </div>
+                <div id="listRows"></div>
+            </div>
+
+            <!-- Empty State -->
+            <div class="empty-state" id="emptyState" style="display: none;">
+                <h3>No documents found</h3>
+                <p>Try adjusting your filters or create a new document.</p>
+            </div>
+        </main>
+    </div>
+
+    <!-- Preview Panel -->
+    <div class="preview-panel" id="previewPanel">
+        <div class="preview-header">
+            <h2 id="previewTitle">Document Preview</h2>
+            <button class="btn-close" onclick="closePreview()">×</button>
+        </div>
+        <div class="preview-content" id="previewContent"></div>
+        <div class="preview-meta" id="previewMeta"></div>
+        <div class="preview-actions">
+            <button class="btn-action" onclick="copyDocContent()">📋 Copy</button>
+            <button class="btn-action" onclick="downloadDoc()">⬇ Download</button>
+            <button class="btn-action" onclick="deleteDoc()">🗑 Delete</button>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <h2 id="modalTitle">New Document</h2>
+            <form id="docForm">
+                <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" id="formTitle" required>
+                </div>
+                <div class="form-group">
+                    <label>Content</label>
+                    <textarea id="formContent" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Project (optional)</label>
+                    <input type="text" id="formProject">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn-primary">Create</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Sample data
+        const sampleDocs = [
+            {
+                id: 1,
+                title: "AGENTS.md",
+                format: "Markdown",
+                content: "# Agent Configuration\n\nThis document outlines the agent system architecture and configuration.\n\n## Overview\nOur agents are autonomous systems designed to...",
+                preview: "This document outlines the agent system architecture and configuration.",
+                author: "Orion",
+                project: "Core Infrastructure",
+                date: "2026-03-20",
+                size: "4.2 KB"
+            },
+            {
+                id: 2,
+                title: "Architecture Decision Record",
+                format: "Markdown",
+                content: "# ADR: Microservices Architecture\n\n## Status\nAccepted\n\n## Context\nWe needed to scale our application...\n\n## Decision\nWe will use microservices architecture...",
+                preview: "ADR documenting the decision to adopt microservices architecture.",
+                author: "Forge",
+                project: "Infrastructure",
+                date: "2026-03-18",
+                size: "3.1 KB"
+            },
+            {
+                id: 3,
+                title: "Weekly Newsletter Draft",
+                format: "HTML",
+                content: "<h1>HiveControl Weekly</h1><p>This week's updates from the team.</p><ul><li>Feature A released</li><li>Bug fixes</li></ul>",
+                preview: "Weekly newsletter highlighting team updates and releases.",
+                author: "Quill",
+                project: "Communications",
+                date: "2026-03-22",
+                size: "2.8 KB"
+            },
+            {
+                id: 4,
+                title: "Security Audit Report",
+                format: "Markdown",
+                content: "# Security Audit - Q1 2026\n\n## Executive Summary\nWe conducted a comprehensive security audit...\n\n## Findings\n- 3 High severity issues\n- 5 Medium severity issues\n\n## Recommendations\n1. Implement WAF\n2. Enable 2FA",
+                preview: "Q1 2026 security audit with findings and recommendations.",
+                author: "Cipher",
+                project: "Security",
+                date: "2026-03-15",
+                size: "5.4 KB"
+            },
+            {
+                id: 5,
+                title: "Brand Guidelines",
+                format: "PDF",
+                content: "Brand Guidelines Document - PDF Reference",
+                preview: "Complete brand guidelines including logos, colors, and typography.",
+                author: "Pixel",
+                project: "Brand",
+                date: "2026-03-10",
+                size: "8.7 KB"
+            },
+            {
+                id: 6,
+                title: "Market Research: AI Assistants",
+                format: "Markdown",
+                content: "# AI Assistant Market Analysis\n\n## Market Size\nThe global AI assistant market is valued at...\n\n## Key Players\n- OpenAI\n- Anthropic\n- Google\n\n## Trends\n- Increased adoption in enterprise\n- Focus on safety and reliability",
+                preview: "Market research analysis of the AI assistant landscape.",
+                author: "Spark",
+                project: "Research",
+                date: "2026-03-08",
+                size: "6.2 KB"
+            }
+        ];
+
+        let allDocuments = [];
+        let currentView = 'grid';
+        let currentPreview = null;
+
+        // Initialize
+        function init() {
+            loadDocuments();
+            renderDocuments();
+            setupFilters();
+            setupEventListeners();
+        }
+
+        function loadDocuments() {
+            const stored = localStorage.getItem('hivecontrol_documents');
+            allDocuments = stored ? JSON.parse(stored) : sampleDocs;
+            saveDocuments();
+        }
+
+        function saveDocuments() {
+            localStorage.setItem('hivecontrol_documents', JSON.stringify(allDocuments));
+        }
+
+        function setupEventListeners() {
+            // View toggle
+            document.querySelectorAll('.view-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    currentView = this.dataset.view;
+                    renderDocuments();
+                });
+            });
+
+            // Search
+            document.getElementById('searchInput').addEventListener('input', filterDocuments);
+
+            // Filters
+            document.querySelectorAll('.format-filter').forEach(filter => {
+                filter.addEventListener('change', filterDocuments);
+            });
+
+            document.getElementById('dateFrom').addEventListener('change', filterDocuments);
+            document.getElementById('dateTo').addEventListener('change', filterDocuments);
+
+            // Modal form
+            document.getElementById('docForm').addEventListener('submit', saveNewDocument);
+        }
+
+        function setupFilters() {
+            // Get unique authors and projects
+            const authors = [...new Set(allDocuments.map(d => d.author))];
+            const projects = [...new Set(allDocuments.map(d => d.project))];
+
+            // Populate author filters
+            const authorFilter = document.getElementById('authorFilter');
+            authors.forEach(author => {
+                const count = allDocuments.filter(d => d.author === author).length;
+                const label = document.createElement('label');
+                label.className = 'filter-option';
+                label.innerHTML = `
+                    <input type="checkbox" class="author-filter" value="${author}">
+                    <span>${author}</span>
+                    <span class="filter-count">${count}</span>
+                `;
+                authorFilter.appendChild(label);
+                label.querySelector('input').addEventListener('change', filterDocuments);
+            });
+
+            // Populate project filters
+            const projectFilter = document.getElementById('projectFilter');
+            projects.forEach(project => {
+                const count = allDocuments.filter(d => d.project === project).length;
+                const label = document.createElement('label');
+                label.className = 'filter-option';
+                label.innerHTML = `
+                    <input type="checkbox" class="project-filter" value="${project}">
+                    <span>${project}</span>
+                    <span class="filter-count">${count}</span>
+                `;
+                projectFilter.appendChild(label);
+                label.querySelector('input').addEventListener('change', filterDocuments);
+            });
+        }
+
+        function filterDocuments() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const selectedFormats = Array.from(document.querySelectorAll('.format-filter:checked')).map(f => f.value);
+            const selectedAuthors = Array.from(document.querySelectorAll('.author-filter:checked')).map(f => f.value);
+            const selectedProjects = Array.from(document.querySelectorAll('.project-filter:checked')).map(f => f.value);
+            const dateFrom = document.getElementById('dateFrom').value;
+            const dateTo = document.getElementById('dateTo').value;
+
+            const filtered = allDocuments.filter(doc => {
+                const matchesSearch = doc.title.toLowerCase().includes(searchTerm) ||
+                    doc.author.toLowerCase().includes(searchTerm) ||
+                    doc.project.toLowerCase().includes(searchTerm) ||
+                    doc.content.toLowerCase().includes(searchTerm);
+
+                const matchesFormat = selectedFormats.length === 0 || selectedFormats.includes(doc.format);
+                const matchesAuthor = selectedAuthors.length === 0 || selectedAuthors.includes(doc.author);
+                const matchesProject = selectedProjects.length === 0 || selectedProjects.includes(doc.project);
+                const matchesDate = (!dateFrom || doc.date >= dateFrom) && (!dateTo || doc.date <= dateTo);
+
+                return matchesSearch && matchesFormat && matchesAuthor && matchesProject && matchesDate;
+            });
+
+            renderDocuments(filtered);
+        }
+
+        function renderDocuments(docs = allDocuments) {
+            updateStats(docs);
+
+            if (docs.length === 0) {
+                document.getElementById('documentsGrid').innerHTML = '';
+                document.getElementById('listRows').innerHTML = '';
+                document.getElementById('emptyState').style.display = 'block';
+                return;
+            }
+
+            document.getElementById('emptyState').style.display = 'none';
+
+            if (currentView === 'grid') {
+                renderGridView(docs);
+                document.getElementById('documentsGrid').style.display = 'grid';
+                document.getElementById('documentsList').style.display = 'none';
+            } else {
+                renderListView(docs);
+                document.getElementById('documentsGrid').style.display = 'none';
+                document.getElementById('documentsList').style.display = 'block';
+            }
+        }
+
+        function renderGridView(docs) {
+            const grid = document.getElementById('documentsGrid');
+            grid.innerHTML = docs.map(doc => `
+                <div class="document-card" onclick="openPreview(${doc.id})">
+                    <div class="doc-header">
+                        <div class="doc-icon ${getFormatClass(doc.format)}">${getFormatIcon(doc.format)}</div>
+                        <div class="doc-title-block">
+                            <div class="doc-title">${doc.title}</div>
+                            <div class="doc-preview">${doc.preview}</div>
+                        </div>
+                    </div>
+                    <div class="doc-meta">
+                        <span class="badge badge-author">👤 ${doc.author}</span>
+                        <span class="badge badge-project">📁 ${doc.project}</span>
+                        <span class="badge badge-date">${formatDate(doc.date)}</span>
+                    </div>
+                    <div class="doc-size">${doc.size}</div>
+                </div>
+            `).join('');
+        }
+
+        function renderListView(docs) {
+            const rows = document.getElementById('listRows');
+            rows.innerHTML = docs.map(doc => `
+                <div class="list-row" onclick="openPreview(${doc.id})">
+                    <div class="list-title">
+                        <span class="doc-icon" style="width: auto; height: auto; background: none; margin-right: 8px;">${getFormatIcon(doc.format)}</span>
+                        <span class="list-title-text">${doc.title}</span>
+                    </div>
+                    <div>${doc.format}</div>
+                    <div>${doc.author}</div>
+                    <div>${doc.project}</div>
+                    <div>${formatDate(doc.date)}</div>
+                    <div class="list-actions">
+                        <button class="action-btn" onclick="event.stopPropagation(); copyDocContent(${doc.id})">📋</button>
+                        <button class="action-btn" onclick="event.stopPropagation(); downloadDoc(${doc.id})">⬇</button>
+                        <button class="action-btn" onclick="event.stopPropagation(); deleteDoc(${doc.id})">🗑</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateStats(docs) {
+            document.getElementById('statTotal').textContent = docs.length;
+            document.getElementById('statMarkdown').textContent = docs.filter(d => d.format === 'Markdown').length;
+            document.getElementById('statHTML').textContent = docs.filter(d => d.format === 'HTML').length;
+            document.getElementById('statPDF').textContent = docs.filter(d => d.format === 'PDF').length;
+
+            const authorCounts = {};
+            docs.forEach(d => {
+                authorCounts[d.author] = (authorCounts[d.author] || 0) + 1;
+            });
+            const topAuthor = Object.entries(authorCounts).sort((a, b) => b[1] - a[1])[0];
+            document.getElementById('statAuthor').textContent = topAuthor ? topAuthor[0] : 'N/A';
+        }
+
+        function getFormatIcon(format) {
+            const icons = {
+                'Markdown': 'MD',
+                'HTML': 'HT',
+                'PDF': 'PDF',
+                'Text': 'TXT',
+                'Code': 'CO'
+            };
+            return icons[format] || '?';
+        }
+
+        function getFormatClass(format) {
+            return format.toLowerCase().replace(/\s+/g, '');
+        }
+
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' });
+        }
+
+        function openPreview(docId) {
+            currentPreview = allDocuments.find(d => d.id === docId);
+            if (!currentPreview) return;
+
+            document.getElementById('previewTitle').textContent = currentPreview.title;
+            document.getElementById('previewContent').innerHTML = markdownToHtml(currentPreview.content);
+            document.getElementById('previewMeta').innerHTML = `
+                <div class="meta-row">
+                    <span class="meta-label">Format</span>
+                    <span class="meta-value">${currentPreview.format}</span>
+                </div>
+                <div class="meta-row">
+                    <span class="meta-label">Author</span>
+                    <span class="meta-value">${currentPreview.author}</span>
+                </div>
+                <div class="meta-row">
+                    <span class="meta-label">Project</span>
+                    <span class="meta-value">${currentPreview.project}</span>
+                </div>
+                <div class="meta-row">
+                    <span class="meta-label">Created</span>
+                    <span class="meta-value">${formatDate(currentPreview.date)}</span>
+                </div>
+                <div class="meta-row">
+                    <span class="meta-label">Size</span>
+                    <span class="meta-value">${currentPreview.size}</span>
+                </div>
+            `;
+
+            document.getElementById('previewPanel').classList.add('open');
+        }
+
+        function closePreview() {
+            document.getElementById('previewPanel').classList.remove('open');
+            currentPreview = null;
+        }
+
+        function copyDocContent(docId = null) {
+            const doc = docId ? allDocuments.find(d => d.id === docId) : currentPreview;
+            if (!doc) return;
+
+            navigator.clipboard.writeText(doc.content).then(() => {
+                alert('Content copied to clipboard!');
+            });
+        }
+
+        function downloadDoc(docId = null) {
+            const doc = docId ? allDocuments.find(d => d.id === docId) : currentPreview;
+            if (!doc) return;
+
+            const extension = doc.format.toLowerCase() === 'markdown' ? 'md' : doc.format.toLowerCase();
+            const filename = doc.title.includes('.') ? doc.title : `${doc.title}.${extension}`;
+            const element = document.createElement('a');
+            element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(doc.content));
+            element.setAttribute('download', filename);
+            element.style.display = 'none';
+            document.body.appendChild(element);
+            element.click();
+            document.body.removeChild(element);
+        }
+
+        function deleteDoc(docId = null) {
+            const doc = docId ? allDocuments.find(d => d.id === docId) : currentPreview;
+            if (!doc) return;
+
+            if (confirm(`Delete "${doc.title}"?`)) {
+                allDocuments = allDocuments.filter(d => d.id !== doc.id);
+                saveDocuments();
+                closePreview();
+                renderDocuments();
+            }
+        }
+
+        function openCreateModal() {
+            document.getElementById('modalTitle').textContent = 'New Document';
+            document.getElementById('docForm').reset();
+            document.getElementById('modalOverlay').classList.add('open');
+        }
+
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.remove('open');
+        }
+
+        function saveNewDocument(e) {
+            e.preventDefault();
+
+            const title = document.getElementById('formTitle').value;
+            const content = document.getElementById('formContent').value;
+            const project = document.getElementById('formProject').value || 'Uncategorized';
+
+            const newDoc = {
+                id: Math.max(...allDocuments.map(d => d.id), 0) + 1,
+                title,
+                format: 'Markdown',
+                content,
+                preview: content.split('\n').slice(0, 2).join(' ').substring(0, 100),
+                author: 'Current User',
+                project,
+                date: new Date().toISOString().split('T')[0],
+                size: (content.length / 1024).toFixed(1) + ' KB'
+            };
+
+            allDocuments.push(newDoc);
+            saveDocuments();
+            setupFilters();
+            renderDocuments();
+            closeModal();
+        }
+
+        // Simple markdown to HTML converter
+        function markdownToHtml(markdown) {
+            let html = markdown;
+
+            // Headers
+            html = html.replace(/^### (.*?)$/gm, '<h3>$1</h3>');
+            html = html.replace(/^## (.*?)$/gm, '<h2>$1</h2>');
+            html = html.replace(/^# (.*?)$/gm, '<h1>$1</h1>');
+
+            // Code blocks
+            html = html.replace(/```(.*?)\n([\s\S]*?)```/gm, '<pre><code>$2</code></pre>');
+
+            // Inline code
+            html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+
+            // Bold
+            html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+            // Italic
+            html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+
+            // Lists
+            html = html.replace(/^\* (.*?)$/gm, '<li>$1</li>');
+            html = html.replace(/^\d+\. (.*?)$/gm, '<li>$1</li>');
+            html = html.replace(/(<li>.*?<\/li>)/s, '<ul>$1</ul>');
+
+            // Blockquotes
+            html = html.replace(/^> (.*?)$/gm, '<blockquote>$1</blockquote>');
+
+            // Line breaks
+            html = html.replace(/\n\n/g, '</p><p>');
+            html = '<p>' + html + '</p>';
+
+            return html;
+        }
+
+        // Close modal on overlay click
+        document.getElementById('modalOverlay').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+
+        // Initialize on load
+        init();
+
+        // ── Gateway Event Bridge (receives events from parent HiveControl shell) ──
+        window.addEventListener('message', (event) => {
+            try {
+                if (event.data && event.data.type === 'hiveEvent') {
+                    const { event: evt, payload } = event.data;
+                    handleGatewayEvent(evt, payload);
+                }
+            } catch (_) {}
+        });
+
+        function handleGatewayEvent(event, payload) {
+            switch (event) {
+                case 'heartbeat':
+                    // Update any live status indicators
+                    break;
+                case 'agent':
+                    // Agent status change
+                    break;
+                case 'health':
+                    // Gateway health update
+                    break;
+                default:
+                    break;
+            }
+        }
+    </script>
+</body>
+</html>
